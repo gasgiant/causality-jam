@@ -11,10 +11,14 @@ public class Game : MonoBehaviour
 	public int DiceCount => diceCount;
 	public DiceSequence DiceSequence { get; private set; }
 
+	private Player player;
+
 	private void Awake()
 	{
 		Instance = this;
 		DiceSequence = new DiceSequence(0, diceCount);
+
+		player = new Player(72);
 	}
 
 
@@ -28,6 +32,17 @@ public class Game : MonoBehaviour
 		}
 		if (health.hp < 0)
 			health.hp = 0;
+	}
+}
+
+public class Player
+{
+	public Health health;
+
+	public Player(int maxHp)
+	{
+		health.maxHp = maxHp;
+		health.hp = maxHp;
 	}
 }
 
@@ -78,6 +93,7 @@ public class DiceSequence
 
 public struct Health
 {
+	public int maxHp;
 	public int hp;
 	public int block;
 }
