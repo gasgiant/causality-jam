@@ -11,7 +11,7 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	Vector3 scaleVel;
 
-	private bool IsHighlighted() => index == Game.Instance.HighlightedItemIndex;
+	private bool IsHighlighted() => index == Game.CurrentEncounter.HighlightedItemIndex;
 
 	public void Display(Verb verb)
 	{
@@ -23,16 +23,17 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		Game.Instance.TrySetHighlightedItem(index);
+		Game.CurrentEncounter.TrySetHighlightedItem(index);
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		Game.Instance.TrySetHighlightedItem(-1);
+		Game.CurrentEncounter.TrySetHighlightedItem(-1);
 	}
 
 	private void Update()
 	{
+		if (!Game.CurrentEncounter) return;
 		Vector3 targetScale = IsHighlighted() ? Vector3.one * 1.15f : Vector3.one;
 		transform.localScale = Vector3.SmoothDamp(transform.localScale, targetScale, ref scaleVel, 0.05f);
 	}

@@ -14,7 +14,7 @@ public abstract class Verb
 
 	public static string DiceText(int die)
 	{
-		int index = Game.DieSpriteIndex(die);
+		int index = Encounter.DieSpriteIndex(die);
 		return $"<size=1><sprite={index}></size>";
 	}
 
@@ -28,6 +28,8 @@ public abstract class Verb
 			return new Sword();
 		if (type == VerbType.Whip)
 			return new Whip();
+		if (type == VerbType.EnemyDamageOnSix)
+			return new EnemyDamageOnSix();
 		return null;
 	}
 }
@@ -37,7 +39,8 @@ public enum VerbType
 	Wait,
 	EnemyDamage,
 	Sword,
-	Whip
+	Whip,
+	EnemyDamageOnSix
 }
 
 public class EnemyDamage : Verb
@@ -47,7 +50,7 @@ public class EnemyDamage : Verb
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		var damage = new Damage(sequence.ConsumeDie());
-		Game.DealDamage(damage, ref player.health);
+		Encounter.DealDamage(damage, ref player.health);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
@@ -56,6 +59,29 @@ public class EnemyDamage : Verb
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
 		return $"Deal {DiceText(die)} damage.";
+	}
+}
+
+public class EnemyDamageOnSix : Verb
+{
+	public override int DiceCount() => 1;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		int die = sequence.ConsumeDie();
+		if (die == 6)
+		{
+			var damage = new Damage(3);
+			Encounter.DealDamage(damage, ref player.health);
+		}
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"{DiceText(die)} On six:\nDeal 3 damage.";
 	}
 }
 
@@ -69,9 +95,9 @@ public class Sword : Verb
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
-		Game.SpendEnergy(EnergyCost(), ref player.energy);
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		var damage = new Damage(sequence.ConsumeDie());
-		Game.DealDamage(damage, ref enemies[targetIndex].health);
+		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
@@ -91,9 +117,9 @@ public class Wait : Verb
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
-		Game.SpendEnergy(EnergyCost(), ref player.energy);
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		sequence.ConsumeDie();
-		Game.AddExtraEnergyNextTurn(1, ref player.energy);
+		Encounter.AddExtraEnergyNextTurn(1, ref player.energy);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
@@ -113,11 +139,11 @@ public class Whip : Verb
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
-		Game.SpendEnergy(EnergyCost(), ref player.energy);
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		var damage = new Damage(sequence.ConsumeDie());
 		for (int i = 0; i < enemies.Count; i++)
 		{
-			Game.DealDamage(damage, ref enemies[i].health);
+			Encounter.DealDamage(damage, ref enemies[i].health);
 		}
 	}
 

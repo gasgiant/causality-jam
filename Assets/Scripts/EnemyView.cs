@@ -23,16 +23,16 @@ public class EnemyView : MonoBehaviour
 		else
 			actionView.Display("");
 
-		if (selectionCatcher.IsSelected && Game.Instance.IsSelectingTarget)
+		if (selectionCatcher.IsSelected && Game.CurrentEncounter.IsSelectingTarget)
 		{
-			Game.Instance.SelectedEnemy = index;
+			Game.CurrentEncounter.SelectedEnemy = index;
 			spriteRenderer.color = Color.red;
 		}
 		else
 		{
-			if (Game.Instance.SelectedEnemy == index)
+			if (Game.CurrentEncounter.SelectedEnemy == index)
 			{
-				Game.Instance.SelectedEnemy = -1;
+				Game.CurrentEncounter.SelectedEnemy = -1;
 			}
 			spriteRenderer.color = Color.white;
 		}
