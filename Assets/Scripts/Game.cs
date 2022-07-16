@@ -13,8 +13,6 @@ public class Game : MonoBehaviour
 
 	public static Game Instance;
 	public enum GameState { None, PlayerTurn, EnemyTurn }
-	
-
 	public int DiceCount => diceCount;
 	public DiceSequence DiceSequence { get; private set; }
 
@@ -29,7 +27,7 @@ public class Game : MonoBehaviour
 		Instance = this;
 		DiceSequence = new DiceSequence(1, diceCount);
 
-		player = new Player(72, 3);
+		player = new Player(1, 3);
 		StartEncounter(encounterConfig);
 
 		items.Add(Verb.Make(VerbType.Sword));
@@ -51,12 +49,12 @@ public class Game : MonoBehaviour
 			{
 				if (Input.GetKeyDown(KeyCode.Alpha1))
 				{
-					UseItem(items[0]);
+					yield return UseItem(items[0]);
 				}
 
 				if (Input.GetKeyDown(KeyCode.Alpha2))
 				{
-					UseItem(items[1]);
+					yield return UseItem(items[1]); 
 				}
 
 
@@ -72,7 +70,9 @@ public class Game : MonoBehaviour
 				for (int i = 0; i < enemies.Count; i++)
 				{
 					yield return new WaitForSeconds(0.5f);
-					enemies[i].nextAction.Execute(DiceSequence, -1, i, player, enemies);
+					var action = enemies[i].nextAction;
+					enemies[i].nextAction = null;
+					yield return DoVerb(action);
 					enemies[i].nextAction = null;
 					UpdateViews();
 					yield return new WaitForSeconds(0.5f);
@@ -104,10 +104,45 @@ public class Game : MonoBehaviour
 		}
 	}
 
-	private void UseItem(Verb item)
+	private IEnumerator UseItem(Verb item)
 	{
 		if (item.EnergyCost() <= player.energy.current)
-			item.Execute(DiceSequence, 0, -1, player, enemies);
+			yield return DoVerb(item);
+		
+	}
+
+	private IEnumerator DoVerb(Verb verb)
+	{
+		verb.Execute(DiceSequence, 0, -1, player, enemies);
+
+		for (int i = enemies.Count - 1; i >= 0; i--)
+		{
+			if (enemies[i].health.IsDead)
+			{
+				enemies[i].view.gameObject.SetActive(false);
+				enemies.RemoveAt(i);
+			}
+		}
+
+		if (player.health.IsDead)
+		{
+			UpdateViews();
+			Debug.Log("Defeat!");
+			while (true)
+			{
+				yield return null;
+			}
+		}
+
+		if (enemies.Count == 0)
+		{
+			UpdateViews();
+			Debug.Log("Victory!");
+			while (true)
+			{
+				yield return null;
+			}
+		}
 	}
 
 	private void UpdateViews()
@@ -292,6 +327,8 @@ public struct Health
 	public int maxHp;
 	public int hp;
 	public int block;
+
+	public bool IsDead => hp <= 0;
 }
 
 public struct Damage
