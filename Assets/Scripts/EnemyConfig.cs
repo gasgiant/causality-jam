@@ -9,4 +9,8 @@ public class EnemyConfig : ScriptableObject
 	public Sprite sprite;
 	public int maxHp = 10;
 	public VerbType[] verbs;
+
+	[Header("Idle")]
+	public float idleFreq = 5;
+	public float idleAmount = 0.1f;
 }

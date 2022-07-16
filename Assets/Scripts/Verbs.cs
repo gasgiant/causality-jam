@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using CameraShake;
 
 public abstract class Verb
 {
@@ -15,7 +16,7 @@ public abstract class Verb
 	public static string DiceText(int die)
 	{
 		int index = Encounter.DieSpriteIndex(die);
-		return $"<size=1><sprite={index}></size>";
+		return $"<size=1> <sprite={index}> </size>";
 	}
 
 	public static Verb Make(VerbType type)
@@ -58,7 +59,7 @@ public class EnemyDamage : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"Deal {DiceText(die)} damage.";
+		return $"Deal{DiceText(die)}damage.";
 	}
 }
 
@@ -98,6 +99,8 @@ public class Sword : Verb
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		var damage = new Damage(sequence.ConsumeDie());
 		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
+		enemies[targetIndex].view.Flash();
+		CameraShaker.Presets.ShortShake2D();
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
@@ -144,7 +147,10 @@ public class Whip : Verb
 		for (int i = 0; i < enemies.Count; i++)
 		{
 			Encounter.DealDamage(damage, ref enemies[i].health);
+			enemies[i].view.Flash();
 		}
+		
+		CameraShaker.Presets.Explosion2D();
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)

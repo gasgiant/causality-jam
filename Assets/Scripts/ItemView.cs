@@ -10,6 +10,7 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	[SerializeField] private TextMeshProUGUI costText;
 
 	Vector3 scaleVel;
+	bool pointerOver;
 
 	private bool IsHighlighted() => index == Game.CurrentEncounter.HighlightedItemIndex;
 
@@ -18,22 +19,30 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		nameText.text = verb.Name();
 		descriptionText.text = verb.Description(IsHighlighted(), 0, Game.Instance.DiceSequence);
 		costText.text = verb.EnergyCost().ToString();
+		costText.color = Game.Player.energy.current < verb.EnergyCost() ? Color.red : Color.white;
 	}
 	
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		Game.CurrentEncounter.TrySetHighlightedItem(index);
+		pointerOver = true;
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		pointerOver = false;
 		Game.CurrentEncounter.TrySetHighlightedItem(-1);
 	}
 
 	private void Update()
 	{
 		if (!Game.CurrentEncounter) return;
+
+		if (pointerOver)
+		{
+			Game.CurrentEncounter.TrySetHighlightedItem(index);
+		}
+
 		Vector3 targetScale = IsHighlighted() ? Vector3.one * 1.15f : Vector3.one;
 		transform.localScale = Vector3.SmoothDamp(transform.localScale, targetScale, ref scaleVel, 0.05f);
 	}

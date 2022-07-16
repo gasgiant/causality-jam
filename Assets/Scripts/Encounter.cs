@@ -27,8 +27,25 @@ public class Encounter : MonoBehaviour
 			HighlightedItemIndex = index;
 	}
 
+	private void OnEnable()
+	{
+		pointerArrow.gameObject.SetActive(false);
+
+		foreach (var view in itemViews)
+		{
+			view.gameObject.SetActive(false);
+		}
+
+		foreach (var view in enemyViews)
+		{
+			view.gameObject.SetActive(false);
+		}
+	}
+
 	public void Begin(EncounterConfig config)
 	{
+		
+
 		StartEncounter(config);
 
 		items.Clear();
