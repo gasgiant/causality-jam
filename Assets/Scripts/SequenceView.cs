@@ -79,11 +79,29 @@ public class SequenceView : MonoBehaviour
 
 	private void UpdateSpritesAndPositions()
 	{
+		int enemyStart = Game.CurrentEncounter != null ? Game.CurrentEncounter.EnemyTurnStart : 0;
+		int enemyEnd = Game.CurrentEncounter != null ? Game.CurrentEncounter.EnemyTurnEnd : 0;
+
 		for (int i = 0; i < diceCount; i++)
 		{
 			int die = diceSequence.PeekDie(i);
 			renderers[i].sprite = diceSprites[die - 1];
 			renderers[i].transform.localPosition = DiePosition(i);
+			renderers[i].color = Color.white;
+			if (i < enemyStart)
+			{
+				renderers[i].color = new Color(0.95f, 0.85f, 0.1f);
+				renderers[i].transform.localScale = Vector3.one * 1.2f;
+			}
+			else
+			{
+				renderers[i].transform.localScale = Vector3.one;
+			}
+
+			if (i >= enemyStart && i < enemyEnd)
+			{
+				renderers[i].color = Color.red;
+			}
 		}
 	}
 

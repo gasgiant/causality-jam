@@ -21,6 +21,9 @@ public class Encounter : MonoBehaviour
 	public bool blockSetHighlightedItem = false;
 	public bool IsSelectingTarget { get; private set; } = false;
 
+	public int EnemyTurnStart { get; private set; }
+	public int EnemyTurnEnd { get; private set; }
+
 	public void TrySetHighlightedItem(int index)
 	{
 		if (!blockSetHighlightedItem)
@@ -192,6 +195,8 @@ public class Encounter : MonoBehaviour
 		int previewStartIndex = HighlightedItemIndex >= 0 ? 
 			items[HighlightedItemIndex].DiceCount() : 0;
 
+		EnemyTurnStart = previewStartIndex;
+
 		for (int i = 0; i < enemies.Count; i++)
 		{
 			var enemy = enemies[i];
@@ -201,7 +206,10 @@ public class Encounter : MonoBehaviour
 				previewStartIndex += enemies[i].nextAction.DiceCount();
 			}
 		}
-	
+
+		EnemyTurnEnd = previewStartIndex;
+
+
 		playerView.Display(Game.Player);
 	}
 

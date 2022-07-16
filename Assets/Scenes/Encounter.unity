@@ -469,9 +469,9 @@ LineRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: 841412153
+  m_SortingLayer: 1
+  m_SortingOrder: 1
   m_Positions:
   - {x: 0, y: 0, z: 0}
   - {x: 1, y: 0, z: 0}
@@ -2351,7 +2351,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -6.67, y: 5.4}
+  m_AnchoredPosition: {x: -7.78, y: -2.2}
   m_SizeDelta: {x: 10.531, y: 2.0339}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1763435368
@@ -2655,7 +2655,7 @@ MonoBehaviour:
   - {fileID: -880043905950401250, guid: 609469e9cb1119248ba622916fefa3e9, type: 3}
   - {fileID: -5478230469006044976, guid: 609469e9cb1119248ba622916fefa3e9, type: 3}
   dieSize: 1
-  spacing: 0.04
+  spacing: 0.06
   moveCurve:
     serializedVersion: 2
     m_Curve:

@@ -59,7 +59,7 @@ public class EnemyDamage : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"Deal{DiceText(die)}damage.";
+		return $"Deal {DiceText(die)} damage.";
 	}
 }
 
