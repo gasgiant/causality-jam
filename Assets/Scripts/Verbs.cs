@@ -4,8 +4,9 @@ using UnityEngine;
 public abstract class Verb
 {
 	public virtual string Name() => "";
-	public abstract int DieCount();
+	public abstract int DiceCount();
 	public virtual int EnergyCost() => 0;
+	public virtual bool IsTargetable() => false;
 
 	public abstract string Description(bool b, int startDieIndex, DiceSequence sequence);
 
@@ -41,7 +42,7 @@ public enum VerbType
 
 public class EnemyDamage : Verb
 {
-	public override int DieCount() => 1;
+	public override int DiceCount() => 1;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
@@ -62,7 +63,9 @@ public class Sword : Verb
 {
 	public override string Name() => "Sword";
 	public override int EnergyCost() => 1;
-	public override int DieCount() => 1;
+	public override int DiceCount() => 1;
+	public override bool IsTargetable() => true;
+
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
@@ -84,7 +87,7 @@ public class Wait : Verb
 {
 	public override string Name() => "Wait";
 	public override int EnergyCost() => 1;
-	public override int DieCount() => 1;
+	public override int DiceCount() => 1;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
@@ -106,7 +109,7 @@ public class Whip : Verb
 {
 	public override string Name() => "Whip";
 	public override int EnergyCost() => 2;
-	public override int DieCount() => 1;
+	public override int DiceCount() => 1;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{

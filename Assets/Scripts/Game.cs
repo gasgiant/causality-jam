@@ -22,6 +22,17 @@ public class Game : MonoBehaviour
 	private List<Enemy> enemies = new List<Enemy>();
 	private List<Verb> items = new List<Verb>();
 
+	public int SelectedEnemy = -1;
+	public int HighlightedItemIndex { get; private set; } = -1;
+	public bool blockSetHighlightedItem = false;
+	public bool IsSelectingTarget { get; private set; } = false;
+
+	public void TrySetHighlightedItem(int index)
+	{
+		if (!blockSetHighlightedItem)
+			HighlightedItemIndex = index;
+	}
+
 	private void Awake()
 	{
 		Instance = this;
@@ -47,14 +58,9 @@ public class Game : MonoBehaviour
 			// states
 			if (currentGameState == GameState.PlayerTurn)
 			{
-				if (Input.GetKeyDown(KeyCode.Alpha1))
+				if (Input.GetKeyDown(KeyCode.Mouse0) && HighlightedItemIndex >= 0)
 				{
-					yield return UseItem(items[0]);
-				}
-
-				if (Input.GetKeyDown(KeyCode.Alpha2))
-				{
-					yield return UseItem(items[1]); 
+					yield return UseItem(items[HighlightedItemIndex]);
 				}
 
 
@@ -72,7 +78,7 @@ public class Game : MonoBehaviour
 					yield return new WaitForSeconds(0.5f);
 					var action = enemies[i].nextAction;
 					enemies[i].nextAction = null;
-					yield return DoVerb(action);
+					yield return DoVerb(action, -1);
 					enemies[i].nextAction = null;
 					UpdateViews();
 					yield return new WaitForSeconds(0.5f);
@@ -107,13 +113,35 @@ public class Game : MonoBehaviour
 	private IEnumerator UseItem(Verb item)
 	{
 		if (item.EnergyCost() <= player.energy.current)
-			yield return DoVerb(item);
-		
+		{
+			blockSetHighlightedItem = true;
+			if (item.IsTargetable())
+				IsSelectingTarget = true;
+			while (Input.GetKey(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Mouse1))
+			{
+				UpdateViews();
+				yield return null;
+			}
+
+			blockSetHighlightedItem = false;
+			HighlightedItemIndex = -1;
+			bool valid = !Input.GetKey(KeyCode.Mouse1);
+
+			if (IsSelectingTarget)
+			{
+				IsSelectingTarget = false;
+				valid &= SelectedEnemy >= 0 && SelectedEnemy < enemies.Count;
+				
+			}
+
+			if (valid)
+				yield return DoVerb(item, SelectedEnemy);
+		}
 	}
 
-	private IEnumerator DoVerb(Verb verb)
+	private IEnumerator DoVerb(Verb verb, int target)
 	{
-		verb.Execute(DiceSequence, 0, -1, player, enemies);
+		verb.Execute(DiceSequence, target, -1, player, enemies);
 
 		for (int i = enemies.Count - 1; i >= 0; i--)
 		{
@@ -147,21 +175,22 @@ public class Game : MonoBehaviour
 
 	private void UpdateViews()
 	{
-		int previewStartIndex = 0;
-
 		for (int i = 0; i < items.Count; i++)
 		{
-			itemViews[i].Display(items[i]);
+			var view = itemViews[i];
+			view.Display(items[i]);
 		}
 
+		int previewStartIndex = HighlightedItemIndex >= 0 ? 
+			items[HighlightedItemIndex].DiceCount() : 0;
 
 		for (int i = 0; i < enemies.Count; i++)
 		{
 			var enemy = enemies[i];
-			enemy.view.Display(enemy, previewStartIndex);
+			enemy.view.Display(enemy, i, previewStartIndex);
 			if (enemy.nextAction != null)
 			{
-				previewStartIndex += enemies[i].nextAction.DieCount();
+				previewStartIndex += enemies[i].nextAction.DiceCount();
 			}
 		}
 	
