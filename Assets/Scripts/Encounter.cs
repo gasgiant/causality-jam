@@ -16,6 +16,7 @@ public class Encounter : MonoBehaviour
 	private List<Enemy> enemies = new List<Enemy>();
 	private List<Verb> items = new List<Verb>();
 
+	public PlayerView PlayerView => playerView;
 	public int SelectedEnemy = -1;
 	public int HighlightedItemIndex { get; private set; } = -1;
 	public bool blockSetHighlightedItem = false;
@@ -47,8 +48,6 @@ public class Encounter : MonoBehaviour
 
 	public void Begin(EncounterConfig config)
 	{
-		
-
 		StartEncounter(config);
 
 		items.Clear();
@@ -170,10 +169,8 @@ public class Encounter : MonoBehaviour
 		if (Game.Player.health.IsDead)
 		{
 			UpdateViews();
-			while (true)
-			{
-				yield return null;
-			}
+			yield return new WaitForSeconds(1);
+			Game.Restart();
 		}
 
 		if (enemies.Count == 0)
@@ -208,9 +205,6 @@ public class Encounter : MonoBehaviour
 		}
 
 		EnemyTurnEnd = previewStartIndex;
-
-
-		playerView.Display(Game.Player);
 	}
 
 	private void StartEncounter(EncounterConfig encounterConfig)

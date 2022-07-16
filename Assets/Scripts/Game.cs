@@ -10,6 +10,8 @@ public class Game : MonoBehaviour
 	public static Encounter CurrentEncounter => Instance.currentEncounter;
 
 	[SerializeField] private int diceCount = 12;
+	[SerializeField] private int startHp = 36;
+	[SerializeField] private int startEnergy = 3;
 	[SerializeField] private EncounterConfig[] encounters;
 	
 	public int DiceCount => diceCount;
@@ -29,6 +31,21 @@ public class Game : MonoBehaviour
 		Instance.timeToStartEncounter = Time.time + 0.05f;
 	}
 
+	public static void Restart()
+	{
+		Instance.currentEncounter.StopAllCoroutines();
+		Instance.currentEncounter = null;
+		SceneManager.LoadScene(0);
+		Instance.currentEncounterIndex = 0;
+		Instance.timeToStartEncounter = Time.time + 0.05f;
+		Instance.ResetPlayer();
+	}
+
+	private void ResetPlayer()
+	{
+		player = new Player(startHp, startEnergy);
+	}
+
 	private void Awake()
 	{
 		if (Instance != null)
@@ -40,7 +57,7 @@ public class Game : MonoBehaviour
 		DontDestroyOnLoad(gameObject);
 
 		DiceSequence = new DiceSequence(1, diceCount);
-		player = new Player(36, 3);
+		player = new Player(startHp, startEnergy);
 
 		
 	}

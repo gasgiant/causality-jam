@@ -51,6 +51,7 @@ public class EnemyDamage : Verb
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		var damage = new Damage(sequence.ConsumeDie());
+		Game.CurrentEncounter.PlayerView.TakeHit();
 		Encounter.DealDamage(damage, ref player.health);
 	}
 
@@ -73,6 +74,7 @@ public class EnemyDamageOnSix : Verb
 		if (die == 6)
 		{
 			var damage = new Damage(3);
+			Game.CurrentEncounter.PlayerView.TakeHit();
 			Encounter.DealDamage(damage, ref player.health);
 		}
 	}
