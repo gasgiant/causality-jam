@@ -8,4 +8,5 @@ public class EnemyConfig : ScriptableObject
 	public string displayName;
 	public Sprite sprite;
 	public int maxHp = 10;
+	public VerbType[] verbs;
 }
