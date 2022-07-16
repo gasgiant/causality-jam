@@ -99,7 +99,7 @@ public class Sword : Verb
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		var damage = new Damage(sequence.ConsumeDie());
 		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
-		enemies[targetIndex].view.Flash();
+		enemies[targetIndex].view.TakeHit();
 		CameraShaker.Presets.ShortShake2D();
 	}
 
@@ -147,7 +147,7 @@ public class Whip : Verb
 		for (int i = 0; i < enemies.Count; i++)
 		{
 			Encounter.DealDamage(damage, ref enemies[i].health);
-			enemies[i].view.Flash();
+			enemies[i].view.TakeHit();
 		}
 		
 		CameraShaker.Presets.Explosion2D();

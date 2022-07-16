@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using CameraShake;
 
 public class EnemyView : MonoBehaviour
 {
@@ -50,34 +51,55 @@ public class EnemyView : MonoBehaviour
 		spriteRenderer.transform.localScale = new Vector3(2, 2 + add, 2);
 	}
 
-	public void Flash()
+	public void Attack()
 	{
-		StartCoroutine(Flash(0.05f, 0.05f, 0.1f));
+		StartCoroutine(MoveAndFlash(Color.red, 0.05f, 0.1f, 0.05f, Vector3.left, Quaternion.identity));
 	}
 
-	private IEnumerator Flash(float upTime, float plato, float downTime)
+	public void TakeHit()
 	{
+		StartCoroutine(MoveAndFlash(Color.white, 0.05f, 0.05f, 0.05f, Vector3.right * 0.2f, Quaternion.AngleAxis(-10, Vector3.forward)));
+	}
+
+	private IEnumerator MoveAndFlash(Color color, float upTime, float plato, float downTime, Vector3 offset, Quaternion rotation)
+	{
+		Transform tr = spriteRenderer.transform;
+		Vector3 initialPosition = tr.localPosition;
+		Quaternion initialRotation = tr.rotation;
+		Quaternion finalRotation = tr.rotation * rotation;
 		Material mat = spriteRenderer.material;
+		mat.SetColor("_Color", color);
 		int id = Shader.PropertyToID("_Flash");
 
 		float t = 0;
 		while (t < 1)
 		{
 			t += Time.deltaTime / upTime;
+			tr.localPosition = initialPosition + offset * t;
+			tr.localRotation = Quaternion.Lerp(finalRotation, finalRotation, t);
 			mat.SetFloat(id, t);
 			yield return null;
 		}
 		mat.SetFloat(id, 1);
-		
+
+		CameraShaker.Presets.ShortShake2D();
 		yield return new WaitForSeconds(plato);
 
 		t = 0;
 		while (t < 1)
 		{
-			t += Time.deltaTime / upTime;
+			t += Time.deltaTime / downTime;
+			tr.localPosition = initialPosition + offset * (1 - t);
+			tr.localRotation = Quaternion.Lerp(finalRotation, finalRotation, 1 - t);
 			mat.SetFloat(id, 1 - t);
 			yield return null;
 		}
+
+		tr.localPosition = initialPosition;
+		tr.localRotation = initialRotation;
 		mat.SetFloat(id, 0);
+		mat.SetColor("_Color", Color.white);
 	}
+
+	
 }

@@ -86,10 +86,10 @@ public class Encounter : MonoBehaviour
 					yield return new WaitForSeconds(0.5f);
 					var action = enemies[i].nextAction;
 					enemies[i].nextAction = null;
+					enemies[i].view.Attack();
 					yield return DoVerb(action, -1);
-					enemies[i].nextAction = null;
 					UpdateViews();
-					yield return new WaitForSeconds(0.5f);
+					yield return new WaitForSeconds(1f);
 				}
 				nextGameState = GameState.PlayerTurn;
 			}
@@ -314,6 +314,7 @@ public class DiceSequence
 	private readonly int[] data;
 
 	private int queueIndex;
+	public int DiceConsumed { get; private set; }
 
 	public DiceSequence(int seed, int capacity)
 	{
@@ -331,6 +332,7 @@ public class DiceSequence
 	{
 		int die = data[queueIndex];
 		GenerateDie();
+		DiceConsumed += 1;
 		return die;
 	}
 
