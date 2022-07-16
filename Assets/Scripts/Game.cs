@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class Game : MonoBehaviour
 {
+	public EncounterConfig encounterConfig;
+
 	[SerializeField] int diceCount = 12;
+	[SerializeField] PlayerView playerView;
+	[SerializeField, NonReorderable] EnemyView[] enemyViews;
 
 	public static Game Instance;
 
@@ -12,13 +16,30 @@ public class Game : MonoBehaviour
 	public DiceSequence DiceSequence { get; private set; }
 
 	private Player player;
+	private List<Enemy> enemies = new List<Enemy>();
 
 	private void Awake()
 	{
 		Instance = this;
 		DiceSequence = new DiceSequence(0, diceCount);
 
-		player = new Player(72);
+		player = new Player(72, 3);
+		playerView.Display(player);
+		StartEncounter(encounterConfig);
+	}
+
+	private void StartEncounter(EncounterConfig encounterConfig)
+	{
+		enemies.Clear();
+		foreach (var view in enemyViews)
+		{
+			view.gameObject.SetActive(false);
+		}
+
+		for (int i = 0; i < encounterConfig.enemies.Length; i++)
+		{
+			enemies.Add(new Enemy(encounterConfig.enemies[i], enemyViews[i]));
+		}
 	}
 
 
@@ -38,11 +59,30 @@ public class Game : MonoBehaviour
 public class Player
 {
 	public Health health;
-
-	public Player(int maxHp)
+	public Energy energy;
+	public Player(int maxHp, int maxEnergy)
 	{
 		health.maxHp = maxHp;
 		health.hp = maxHp;
+
+		energy.max = maxEnergy;
+		energy.current = maxEnergy;
+	}
+}
+
+public class Enemy
+{
+	public Health health;
+	public EnemyConfig config;
+	public EnemyView view;
+
+	public Enemy(EnemyConfig config, EnemyView view)
+	{
+		this.config = config;
+		this.view = view;
+		health.maxHp = config.maxHp;
+		health.hp = config.maxHp;
+		view.Display(this);
 	}
 }
 
@@ -91,6 +131,12 @@ public class DiceSequence
 	}
 }
 
+public struct Energy
+{
+	public int max;
+	public int current;
+}
+
 public struct Health
 {
 	public int maxHp;
@@ -101,4 +147,15 @@ public struct Health
 public struct Damage
 {
 	public int value;
+}
+
+public enum DieSpriteIndex
+{
+	One = 0,
+	Two = 1,
+	Three = 2,
+	Empty = 3,
+	Four = 4,
+	Five = 5,
+	Six = 6
 }
