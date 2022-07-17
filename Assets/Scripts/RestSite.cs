@@ -6,6 +6,7 @@ using TMPro;
 
 public class RestSite : MonoBehaviour
 {
+	public Transform playerTransform;
 	public HideScreenImageEffect hideScreen;
 	public Button healButton;
 	public TextMeshProUGUI healText;
@@ -92,7 +93,7 @@ public class RestSite : MonoBehaviour
 				int die0 = Game.Instance.DiceSequence.ConsumeDie();
 				int die1 = Game.Instance.DiceSequence.ConsumeDie();
 				int die2 = Game.Instance.DiceSequence.ConsumeDie();
-				Encounter.Heal(die0 + die1 + die2, ref Game.Player.health);
+				Encounter.Heal(die0 + die1 + die2, ref Game.Player.health, playerTransform.position);
 				yield return new WaitForSeconds(0.5f);
 				yield return Continue();
 			}

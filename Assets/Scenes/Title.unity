@@ -605,6 +605,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 508a4f842ae15b940adbe47ab6abb3ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healParticle: {fileID: 3426486819152652241, guid: 71b25b09941e21f409af8e1bedc7c78b, type: 3}
   debugStartEnc: 0
   diceCount: 12
   startHp: 24
@@ -613,6 +614,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 56ab63cbfa9e7bb49910c104e8e26f03, type: 2}
   - {fileID: 11400000, guid: da729eda7c866aa46bc643738bdca2b6, type: 2}
   - {fileID: 11400000, guid: e32b9c72f7306614583cce4085f3f050, type: 2}
+  - {fileID: 11400000, guid: 3647e8d03f8d2fc46bd31d156558d1f4, type: 2}
+  boss: {fileID: 11400000, guid: 367eebf24661d424ca28da616964089f, type: 2}
 --- !u!4 &1129005462
 Transform:
   m_ObjectHideFlags: 0

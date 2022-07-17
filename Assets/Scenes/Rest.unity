@@ -2850,6 +2850,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42909628e1f36774cb9a902e15f1277b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerTransform: {fileID: 1350135595}
   hideScreen: {fileID: 963194231}
   healButton: {fileID: 266822172}
   healText: {fileID: 763651654}

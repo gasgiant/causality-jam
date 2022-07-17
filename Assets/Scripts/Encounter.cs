@@ -5,12 +5,14 @@ using UnityEngine.UI;
 
 public class Encounter : MonoBehaviour
 {
+	[SerializeField] ParticleSystem veil;
 	[SerializeField] FadeCanvasGroup deathScreen;
 	[SerializeField] HideScreenImageEffect hideScreen;
 	[SerializeField] Button passTurnButton;
 	[SerializeField] PointerArrow pointerArrow;
 	[SerializeField] PlayerView playerView;
 	[SerializeField] GameObject shieldParticle;
+	
 	[SerializeField, NonReorderable] ItemView[] itemViews;
 	[SerializeField] EnemyView[] enemyViews;
 	public enum GameState { None, PlayerTurn, EnemyTurn }
@@ -32,6 +34,17 @@ public class Encounter : MonoBehaviour
 	public int EnemyTurnEnd { get; private set; }
 	bool passTurnPressed;
 	bool restartPressed = false;
+
+	public float veilDelayTime;
+
+	public int veilCountdown;
+	public void CastVeil()
+	{
+		veilCountdown = 3;
+		var emission = veil.emission;
+		emission.rateOverTimeMultiplier = 15;
+		veilDelayTime = Time.time + 2;
+	}
 
 	public void TrySetHighlightedItem(int index)
 	{
@@ -69,7 +82,6 @@ public class Encounter : MonoBehaviour
 		hideScreen.SetValue(1);
 		StartEncounter(config);
 
-
 		for (int i = 0; i < Game.Items.Count; i++)
 		{
 			itemViews[i].gameObject.SetActive(true);
@@ -90,9 +102,7 @@ public class Encounter : MonoBehaviour
 			// states
 			if (currentGameState == GameState.PlayerTurn)
 			{
-				if (Input.GetKeyDown(KeyCode.W) 
-					&& Input.GetKey(KeyCode.LeftShift)
-					&& Input.GetKey(KeyCode.LeftControl))
+				if (Input.GetKeyDown(KeyCode.Return))
 				{
 					float hideTime = hideScreen.Show();
 					yield return new WaitForSeconds(hideTime + 0.5f);
@@ -122,6 +132,10 @@ public class Encounter : MonoBehaviour
 					var action = enemies[i].nextAction;
 					enemies[i].nextAction = null;
 					yield return DoVerb(action, -1, i);
+					if (action.GetType() == typeof(Veil))
+					{
+						yield return new WaitForSeconds(2f);
+					}
 					UpdateViews();
 					yield return new WaitForSeconds(1f);
 				}
@@ -151,6 +165,13 @@ public class Encounter : MonoBehaviour
 
 			if (nextGameState == GameState.EnemyTurn)
 			{
+				veilCountdown -= 1;
+				if (veilCountdown <= 0)
+				{
+					var emission = veil.emission;
+					emission.rateOverTime = 0;
+				}
+
 				nextGameState = GameState.None;
 				currentGameState = GameState.EnemyTurn;
 
@@ -300,9 +321,10 @@ public class Encounter : MonoBehaviour
 			health.hp = 0;
 	}
 
-	public static void Heal(int amount, ref Health health)
+	public static void Heal(int amount, ref Health health, Vector3 targetPosition)
 	{
 		health.hp = Mathf.Min(health.hp + amount, health.maxHp);
+		Instantiate(Game.Instance.healParticle, targetPosition, Quaternion.identity);
 	}
 
 	public static void AddBlock(int amount, ref Health health, Vector3 targetPosition)
@@ -382,6 +404,8 @@ public class Enemy
 	public EnemyView view;
 	public Verb nextAction;
 
+	bool openerPlayer = false;
+
 	public Enemy(EnemyConfig config, EnemyView view)
 	{
 		this.config = config;
@@ -392,7 +416,15 @@ public class Enemy
 
 	public void PickAction()
 	{
-		nextAction = Verb.Make(config.verbs[Random.Range(0, config.verbs.Length)]); 
+		if (config.opener != EnemyAbility.None && !openerPlayer)
+		{
+			openerPlayer = true;
+			nextAction = Verb.Make(config.opener);
+		}
+		else
+		{
+			nextAction = Verb.Make(config.verbs[Random.Range(0, config.verbs.Length)]);
+		}
 	}
 }
 

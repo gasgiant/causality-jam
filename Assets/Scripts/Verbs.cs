@@ -60,6 +60,10 @@ public abstract class Verb
 			return new EnemyBlockTwo();
 		if (type == EnemyAbility.AoeHeal)
 			return new EnemyHealAoE();
+		if (type == EnemyAbility.Veil)
+			return new Veil();
+		if (type == EnemyAbility.Nothing)
+			return new Nothing();
 		return null;
 	}
 }
@@ -73,7 +77,44 @@ public enum EnemyAbility
 	DamagePlusConditionalBlock,
 	DamageTwo,
 	BlockTwo,
-	AoeHeal
+	AoeHeal,
+	None,
+	Veil,
+	Nothing
+}
+
+public class Veil : Verb
+{
+	public override int DiceCount() => 6;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Game.CurrentEncounter.CastVeil();
+		for (int i = 0; i < 6; i++)
+		{
+			sequence.ConsumeDie();
+		}
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		int die2 = -1;
+		int die3 = -1;
+		int die4 = -1;
+		int die5 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+			die2 = sequence.PeekDie(startDieIndex + 2);
+			die3 = sequence.PeekDie(startDieIndex + 3);
+			die4 = sequence.PeekDie(startDieIndex + 4);
+			die5 = sequence.PeekDie(startDieIndex + 5);
+		}
+		return $"{DiceText(die0)} {DiceText(die1)} {DiceText(die2)}\n{DiceText(die3)} {DiceText(die4)} {DiceText(die5)}\nCasts Veil.";
+	}
 }
 
 public class EnemyDamage : Verb
@@ -94,6 +135,20 @@ public class EnemyDamage : Verb
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
 		return $"Deals {DiceText(die)} damage.";
+	}
+}
+
+public class Nothing : Verb
+{
+	public override int DiceCount() => 0;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		return "Does nothing.";
 	}
 }
 
@@ -239,8 +294,7 @@ public class EnemyHealAoE : Verb
 		{
 			for (int i = 0; i < enemies.Count; i++)
 			{
-				Encounter.Heal(6, ref enemies[i].health);
-				//Encounter.AddBlock(sequence.ConsumeDie() + sequence.ConsumeDie(), ref enemies[selfIndex].health, enemies[selfIndex].view.spriteRenderer.transform.position + Vector3.up);
+				Encounter.Heal(6, ref enemies[i].health, enemies[i].view.spriteRenderer.transform.position);
 			}
 		}
 	}
@@ -324,7 +378,7 @@ public class Bite : Verb
 		var damage = new Damage(die);
 		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
 		if (die >= 4)
-			Encounter.Heal(3, ref player.health);
+			Encounter.Heal(3, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
 		enemies[targetIndex].view.TakeHit();
 		CameraShaker.Presets.ShortShake2D();
 	}
@@ -527,6 +581,31 @@ public class Wait : Verb
 	public override int EnergyCost() => 0;
 	public override int DiceCount() => 1;
 	public override int MaxUses() => 2;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		uses -= 1;
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		sequence.ConsumeDie();
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+		}
+		return $"{DiceText(die0)}";
+	}
+}
+
+public class Paitience : Verb
+{
+	public override string Name() => "Patience";
+	public override int EnergyCost() => 0;
+	public override int DiceCount() => 1;
+	public override int MaxUses() => 3;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{

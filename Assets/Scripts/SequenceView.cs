@@ -38,6 +38,11 @@ public class SequenceView : MonoBehaviour
 		{
 			if (previousDiceConsumed != diceSequence.DiceConsumed)
 			{
+				while (Game.CurrentEncounter && Time.time < Game.CurrentEncounter.veilDelayTime)
+				{
+					yield return null;
+				}
+
 				int diff = diceSequence.DiceConsumed - previousDiceConsumed;
 				previousDiceConsumed = diceSequence.DiceConsumed;
 

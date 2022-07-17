@@ -9,20 +9,32 @@ public class Game : MonoBehaviour
 	public static Player Player => Instance.player;
 	public static Encounter CurrentEncounter => Instance.currentEncounter;
 
+	public GameObject healParticle;
 	[SerializeField] private int debugStartEnc = 0;
 	[SerializeField] private int diceCount = 12;
 	[SerializeField] private int startHp = 36;
 	[SerializeField] private int startEnergy = 3;
 	[SerializeField] private EncounterPool[] encounterPools;
+	[SerializeField] private EncounterConfig boss;
 
 	private EncounterConfig GetNextEncounter()
 	{
-		if (currentEncounterIndex + debugStartEnc < 2)
+		if (currentEncounterIndex + debugStartEnc < 1)
 			return encounterPools[0].GetEncounterConfig();
-		if (currentEncounterIndex + debugStartEnc < 5)
+
+		if (currentEncounterIndex + debugStartEnc < 4)
 			return encounterPools[1].GetEncounterConfig();
-		if (currentEncounterIndex + debugStartEnc < 8)
+
+
+		if (currentEncounterIndex + debugStartEnc < 7)
 			return encounterPools[2].GetEncounterConfig();
+
+
+		if (currentEncounterIndex + debugStartEnc < 8)
+			return encounterPools[3].GetEncounterConfig();
+
+		if (currentEncounterIndex == 8)
+			return boss;
 
 		return encounterPools[encounterPools.Length - 1].GetEncounterConfig();
 	}
@@ -42,7 +54,17 @@ public class Game : MonoBehaviour
 	private List<Verb> items = new List<Verb>();
 	private List<Verb> treasures = new List<Verb>();
 
-	private bool IsTreasureRoom() => currentFloorIndex % 4 == 3;
+	private int[] restFloors = { 2, 6, 10 };
+	private bool IsTreasureRoom()
+	{
+		for (int i = 0; i < restFloors.Length; i++)
+		{
+			if (currentFloorIndex == restFloors[i])
+				return true;
+		}
+
+		return false;
+	}
 	//private bool IsTreasureRoom() => currentFloorIndex % 2 == 1;
 
 	public static List<Verb> Items => Instance.items;
@@ -96,7 +118,7 @@ public class Game : MonoBehaviour
 		items.Add(new Sword());
 		items.Add(new Shield());
 		items.Add(new Wait());
-		//items.Add(new Zweihander());
+		items.Add(new Bite());
 
 		if (currentEncounter)
 		{
