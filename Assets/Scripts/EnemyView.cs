@@ -6,7 +6,7 @@ using CameraShake;
 public class EnemyView : MonoBehaviour
 {
 	[SerializeField] private SelectionCatcher selectionCatcher;
-	[SerializeField] private SpriteRenderer spriteRenderer;
+	[SerializeField] public SpriteRenderer spriteRenderer;
 	[SerializeField] private TextMeshProUGUI nameText;
 	[SerializeField] private HealthView healthView;
 	[SerializeField] private EnemyActionView actionView;

@@ -6,7 +6,7 @@ using CameraShake;
 public class PlayerView : MonoBehaviour
 {
 	[SerializeField] private Animator animator;
-	[SerializeField] private SpriteRenderer spriteRenderer;
+	[SerializeField] public SpriteRenderer spriteRenderer;
 	[SerializeField] private HealthView healthView;
 	[SerializeField] private TextMeshProUGUI energyText;
 

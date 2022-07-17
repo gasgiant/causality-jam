@@ -6,6 +6,7 @@ public class Encounter : MonoBehaviour
 {
 	[SerializeField] PointerArrow pointerArrow;
 	[SerializeField] PlayerView playerView;
+	[SerializeField] GameObject shieldParticle;
 	[SerializeField, NonReorderable] ItemView[] itemViews;
 	[SerializeField, NonReorderable] EnemyView[] enemyViews;
 	public enum GameState { None, PlayerTurn, EnemyTurn }
@@ -51,10 +52,12 @@ public class Encounter : MonoBehaviour
 		StartEncounter(config);
 
 		items.Clear();
-		items.Add(Verb.Make(VerbType.Sword));
+		items.Add(new Sword());
 		itemViews[0].gameObject.SetActive(true);
-		items.Add(Verb.Make(VerbType.Wait));
+		items.Add(new Shield());
 		itemViews[1].gameObject.SetActive(true);
+		items.Add(new Wait());
+		itemViews[2].gameObject.SetActive(true);
 
 		UpdateViews();
 
@@ -88,8 +91,7 @@ public class Encounter : MonoBehaviour
 					yield return new WaitForSeconds(0.5f);
 					var action = enemies[i].nextAction;
 					enemies[i].nextAction = null;
-					enemies[i].view.Attack();
-					yield return DoVerb(action, -1);
+					yield return DoVerb(action, -1, i);
 					UpdateViews();
 					yield return new WaitForSeconds(1f);
 				}
@@ -149,13 +151,13 @@ public class Encounter : MonoBehaviour
 			}
 
 			if (valid)
-				yield return DoVerb(item, SelectedEnemy);
+				yield return DoVerb(item, SelectedEnemy, -1);
 		}
 	}
 
-	private IEnumerator DoVerb(Verb verb, int target)
+	private IEnumerator DoVerb(Verb verb, int target, int selfIndex)
 	{
-		verb.Execute(Game.Instance.DiceSequence, target, -1, Game.Player, enemies);
+		verb.Execute(Game.Instance.DiceSequence, target, selfIndex, Game.Player, enemies);
 
 		for (int i = enemies.Count - 1; i >= 0; i--)
 		{
@@ -235,6 +237,12 @@ public class Encounter : MonoBehaviour
 		}
 		if (health.hp < 0)
 			health.hp = 0;
+	}
+
+	public static void AddBlock(int amount, ref Health health, Vector3 targetPosition)
+	{
+		health.block += amount;
+		Instantiate(Game.CurrentEncounter.shieldParticle, targetPosition, Quaternion.identity);
 	}
 
 	public static void AddExtraEnergyNextTurn(int amount, ref Energy energy)

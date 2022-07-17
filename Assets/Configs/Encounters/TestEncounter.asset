@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: TestEncounter
   m_EditorClassIdentifier: 
   enemies:
+  - {fileID: 11400000, guid: 7ac867fc633889047b7b1584d142b439, type: 2}
   - {fileID: 11400000, guid: 24da750a5418c154e9f4513538d651b3, type: 2}
   - {fileID: 11400000, guid: 7ac867fc633889047b7b1584d142b439, type: 2}

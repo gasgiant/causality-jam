@@ -19,29 +19,23 @@ public abstract class Verb
 		return $"<size=1> <sprite={index}> </size>";
 	}
 
-	public static Verb Make(VerbType type)
+	public static Verb Make(EnemyAbility type)
 	{
-		if (type == VerbType.Wait)
-			return new Wait();
-		if (type == VerbType.EnemyDamage)
+		if (type == EnemyAbility.Damage)
 			return new EnemyDamage();
-		if (type == VerbType.Sword)
-			return new Sword();
-		if (type == VerbType.Whip)
-			return new Whip();
-		if (type == VerbType.EnemyDamageOnSix)
+		if (type == EnemyAbility.DamageOnSix)
 			return new EnemyDamageOnSix();
+		if (type == EnemyAbility.DamageOrBlock)
+			return new EnemyDamageOrBlock();
 		return null;
 	}
 }
 
-public enum VerbType
+public enum EnemyAbility
 {
-	Wait,
-	EnemyDamage,
-	Sword,
-	Whip,
-	EnemyDamageOnSix
+	Damage,
+	DamageOnSix,
+	DamageOrBlock
 }
 
 public class EnemyDamage : Verb
@@ -52,6 +46,7 @@ public class EnemyDamage : Verb
 	{
 		var damage = new Damage(sequence.ConsumeDie());
 		Game.CurrentEncounter.PlayerView.TakeHit();
+		enemies[selfIndex].view.Attack();
 		Encounter.DealDamage(damage, ref player.health);
 	}
 
@@ -75,6 +70,7 @@ public class EnemyDamageOnSix : Verb
 		{
 			var damage = new Damage(3);
 			Game.CurrentEncounter.PlayerView.TakeHit();
+			enemies[selfIndex].view.Attack();
 			Encounter.DealDamage(damage, ref player.health);
 		}
 	}
@@ -85,6 +81,35 @@ public class EnemyDamageOnSix : Verb
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
 		return $"{DiceText(die)} On six:\nDeal 3 damage.";
+	}
+}
+
+public class EnemyDamageOrBlock : Verb
+{
+	public override int DiceCount() => 1;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		int die = sequence.ConsumeDie();
+		if (die % 2 == 0)
+		{
+			var damage = new Damage(die);
+			Game.CurrentEncounter.PlayerView.TakeHit();
+			enemies[selfIndex].view.Attack();
+			Encounter.DealDamage(damage, ref player.health);
+		}
+		else
+		{
+			Encounter.AddBlock(die, ref enemies[selfIndex].health, enemies[selfIndex].view.spriteRenderer.transform.position + Vector3.up);
+		}
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"{DiceText(die)}\nODD: Deal X damage\nEVEN: Add X block.";
 	}
 }
 
@@ -114,17 +139,19 @@ public class Sword : Verb
 	}
 }
 
-public class Wait : Verb
+public class Shield : Verb
 {
-	public override string Name() => "Wait";
+	public override string Name() => "Shield";
 	public override int EnergyCost() => 1;
 	public override int DiceCount() => 1;
+	public override bool IsTargetable() => false;
+
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
-		sequence.ConsumeDie();
-		Encounter.AddExtraEnergyNextTurn(1, ref player.energy);
+		int die = sequence.ConsumeDie();
+		Encounter.AddBlock(die, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
@@ -132,7 +159,37 @@ public class Wait : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"{DiceText(die)}\nGet 1 extra energy\nnext turn.";
+		return $"Add {DiceText(die)} block.";
+	}
+}
+
+public class Wait : Verb
+{
+	public override string Name() => "Wait";
+	public override int EnergyCost() => 1;
+	public override int DiceCount() => 3;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		sequence.ConsumeDie();
+		sequence.ConsumeDie();
+		sequence.ConsumeDie();
+		Encounter.AddExtraEnergyNextTurn(1, ref player.energy);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		int die2 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+			die2 = sequence.PeekDie(startDieIndex + 2);
+		}
+		return $"{DiceText(die0)}{DiceText(die1)}{DiceText(die2)}\nGet 1 extra energy\nnext turn.";
 	}
 }
 

@@ -58,8 +58,6 @@ public class Game : MonoBehaviour
 
 		DiceSequence = new DiceSequence(1, diceCount);
 		player = new Player(startHp, startEnergy);
-
-		
 	}
 
 	private void Update()
