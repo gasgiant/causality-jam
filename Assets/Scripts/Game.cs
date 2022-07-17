@@ -9,10 +9,21 @@ public class Game : MonoBehaviour
 	public static Player Player => Instance.player;
 	public static Encounter CurrentEncounter => Instance.currentEncounter;
 
+	[SerializeField] private int debugStartEnc = 0;
 	[SerializeField] private int diceCount = 12;
 	[SerializeField] private int startHp = 36;
 	[SerializeField] private int startEnergy = 3;
-	[SerializeField] private EncounterConfig[] encounters;
+	[SerializeField] private EncounterPool[] encounterPools;
+
+	private EncounterConfig GetNextEncounter()
+	{
+		if (currentEncounterIndex + debugStartEnc < 2)
+			return encounterPools[0].GetEncounterConfig();
+		if (currentEncounterIndex + debugStartEnc < 5)
+			return encounterPools[1].GetEncounterConfig();
+
+		return encounterPools[encounterPools.Length - 1].GetEncounterConfig();
+	}
 	
 	public int DiceCount => diceCount;
 	public DiceSequence DiceSequence { get; private set; }
@@ -43,6 +54,15 @@ public class Game : MonoBehaviour
 
 	public void NewGame()
 	{
+		int seed = 1;
+
+		//DiceSequence = new DiceSequence(seed, diceCount);
+
+		for (int i = 0; i < encounterPools.Length; i++)
+		{
+			encounterPools[i].Setup(seed + i);
+		}
+
 		gameStarted = true;
 		items.Clear();
 		items.Add(new Sword());
@@ -69,7 +89,7 @@ public class Game : MonoBehaviour
 			currentEncounter = null;
 		}
 		currentFloorIndex += 1;
-		Instance.ResetPlayer();
+		ResetPlayer();
 
 		if (IsTreasureRoom())
 		{
@@ -86,7 +106,6 @@ public class Game : MonoBehaviour
 	private void ResetPlayer()
 	{
 		var health = player.health;
-		health.hp = health.maxHp;
 		health.block = 0;
 		player.health = health;
 
@@ -117,8 +136,7 @@ public class Game : MonoBehaviour
 		if (gameStarted && !IsTreasureRoom() && currentEncounter == null && Time.time > timeToStartEncounter)
 		{
 			currentEncounter = FindObjectOfType<Encounter>();
-			currentEncounter.Begin(
-				encounters[Mathf.Min(currentFloorIndex, encounters.Length - 1)]);
+			currentEncounter.Begin(GetNextEncounter());
 		}
 	}
 }

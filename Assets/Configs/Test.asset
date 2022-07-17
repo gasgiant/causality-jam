@@ -9,12 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 272ec5717d22ec54abbcb2cb6b39d545, type: 3}
-  m_Name: Mole
+  m_Script: {fileID: 11500000, guid: d7eac8e6542fe504d8893daee7bccf11, type: 3}
+  m_Name: Test
   m_EditorClassIdentifier: 
-  displayName: Mole
-  sprite: {fileID: 21300000, guid: 1e1cfe8122c064c90845f710bdbd068f, type: 3}
-  maxHp: 21
-  verbs: 03000000
-  idleFreq: 14
-  idleAmount: 0.2
+  encounters:
+  - {fileID: 11400000, guid: ce8e6384f5b564b4b94a8589fc87c90d, type: 2}

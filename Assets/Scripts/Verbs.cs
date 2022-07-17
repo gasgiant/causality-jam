@@ -30,6 +30,12 @@ public abstract class Verb
 		return $"<size={dieTextSize}>{prefix}<sprite={index}></size>";
 	}
 
+	public static string DiceInvertedText(int die, string prefix = "")
+	{
+		int index = Encounter.DieSpriteInvertedeIndex(die);
+		return $"<size={dieTextSize}>{prefix}<sprite={index}></size>";
+	}
+
 	public static string EmptySmallDiceText()
 	{
 		int index = Encounter.DieSpriteIndex(-1);
@@ -40,10 +46,14 @@ public abstract class Verb
 	{
 		if (type == EnemyAbility.Damage)
 			return new EnemyDamage();
-		if (type == EnemyAbility.DamageOnSix)
-			return new EnemyDamageOnSix();
+		if (type == EnemyAbility.DamageOnOne)
+			return new EnemyDamageOnOne();
 		if (type == EnemyAbility.DamageOrBlock)
 			return new EnemyDamageOrBlock();
+		if (type == EnemyAbility.DoubleDamageOdd)
+			return new EnemyDoubleDamageOdd();
+		if (type == EnemyAbility.DamagePlusConditionalBlock)
+			return new EnemyDamagePlusConditionalBlock();
 		return null;
 	}
 }
@@ -51,8 +61,10 @@ public abstract class Verb
 public enum EnemyAbility
 {
 	Damage,
-	DamageOnSix,
-	DamageOrBlock
+	DamageOnOne,
+	DamageOrBlock,
+	DoubleDamageOdd,
+	DamagePlusConditionalBlock
 }
 
 public class EnemyDamage : Verb
@@ -72,20 +84,47 @@ public class EnemyDamage : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"Deal {DiceText(die)} damage.";
+		return $"Deals {DiceText(die)} damage.";
 	}
 }
 
-public class EnemyDamageOnSix : Verb
+public class EnemyDamagePlusConditionalBlock : Verb
 {
 	public override int DiceCount() => 1;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		int die = sequence.ConsumeDie();
-		if (die == 6)
+		var damage = new Damage(die);
+		Game.CurrentEncounter.PlayerView.TakeHit();
+		enemies[selfIndex].view.Attack();
+		Encounter.DealDamage(damage, ref player.health);
+
+		if (die >= 4)
 		{
-			var damage = new Damage(3);
+			Encounter.AddBlock(4, ref enemies[selfIndex].health, enemies[selfIndex].view.spriteRenderer.transform.position + Vector3.up);
+		}
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"Deals {DiceText(die)} damage.\nON {DiceInvertedText(4)} +\nAdds 4 block.";
+	}
+}
+
+public class EnemyDoubleDamageOdd : Verb
+{
+	public override int DiceCount() => 1;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		int die = sequence.ConsumeDie();
+		if (die % 2 == 1)
+		{
+			var damage = new Damage(die * 2);
 			Game.CurrentEncounter.PlayerView.TakeHit();
 			enemies[selfIndex].view.Attack();
 			Encounter.DealDamage(damage, ref player.health);
@@ -97,7 +136,35 @@ public class EnemyDamageOnSix : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"{DiceText(die)} On six:\nDeal 3 damage.";
+		//return $"ODD:\nDeal {DiceText(die)} x 2\n damage.";
+		return $"{DiceText(die)}\nODD:\nDeals {EmptySmallDiceText()} x 2 damage.";
+	}
+}
+
+public class EnemyDamageOnOne : Verb
+{
+	public override int DiceCount() => 1;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		int die = sequence.ConsumeDie();
+		int dmg = die;
+		if (die == 1)
+		{
+			dmg += 6;
+		}
+		var damage = new Damage(dmg);
+		Game.CurrentEncounter.PlayerView.TakeHit();
+		enemies[selfIndex].view.Attack();
+		Encounter.DealDamage(damage, ref player.health);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"Deals {DiceText(die)} damage.\nON {DiceInvertedText(1)}\nDeals 6 more\ndamage.";
 	}
 }
 

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9295c39b9281cbd40b44095578c20a25, type: 3}
-  m_Name: TestEncounter
+  m_Name: TestEncounter 1
   m_EditorClassIdentifier: 
   enemies:
-  - {fileID: 11400000, guid: 7ac867fc633889047b7b1584d142b439, type: 2}
-  - {fileID: 11400000, guid: 24da750a5418c154e9f4513538d651b3, type: 2}
-  - {fileID: 11400000, guid: 7ac867fc633889047b7b1584d142b439, type: 2}
+  - {fileID: 11400000, guid: 6a5279c5a605c624f80654b48ecde0f9, type: 2}
+  - {fileID: 11400000, guid: b629ca3d916d9c54e93fa7a0f0148738, type: 2}
+  - {fileID: 11400000, guid: c9990d9baf8a05040bdf6890a3cae7a0, type: 2}

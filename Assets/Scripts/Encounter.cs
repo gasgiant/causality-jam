@@ -125,6 +125,7 @@ public class Encounter : MonoBehaviour
 				nextGameState = GameState.None;
 				currentGameState = GameState.PlayerTurn;
 				passTurnButton.interactable = true;
+				ClearBlock(ref Game.Player.health);
 
 				foreach (var enemy in enemies)
 				{
@@ -143,6 +144,13 @@ public class Encounter : MonoBehaviour
 			{
 				nextGameState = GameState.None;
 				currentGameState = GameState.EnemyTurn;
+
+				for (int i = 0; i < enemies.Count; i++)
+				{
+					ClearBlock(ref enemies[i].health);
+				}
+				UpdateViews();
+				yield return new WaitForSeconds(0.2f);
 			}
 
 			yield return null;
@@ -294,6 +302,11 @@ public class Encounter : MonoBehaviour
 		Instantiate(Game.CurrentEncounter.shieldParticle, targetPosition, Quaternion.identity);
 	}
 
+	public static void ClearBlock(ref Health health)
+	{
+		health.block = 0;
+	}
+
 	public static void AddExtraEnergyNextTurn(int amount, ref Energy energy)
 	{
 		energy.extraNextTurn += amount;
@@ -328,6 +341,14 @@ public class Encounter : MonoBehaviour
 			return 6;
 
 		return 3;
+	}
+
+	public static int DieSpriteInvertedeIndex(int die)
+	{
+		if (die <= 0)
+			return 3;
+
+		return die + 6;
 	}
 }
 

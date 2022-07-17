@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 272ec5717d22ec54abbcb2cb6b39d545, type: 3}
-  m_Name: Mole
+  m_Name: Ghost
   m_EditorClassIdentifier: 
-  displayName: Mole
-  sprite: {fileID: 21300000, guid: 1e1cfe8122c064c90845f710bdbd068f, type: 3}
-  maxHp: 21
-  verbs: 03000000
-  idleFreq: 14
+  displayName: Ghost
+  sprite: {fileID: 21300000, guid: c12c1e5d15cc04027be9a9e7cb637f2d, type: 3}
+  maxHp: 25
+  verbs: 01000000
+  idleFreq: 3
   idleAmount: 0.2
