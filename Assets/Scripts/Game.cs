@@ -22,28 +22,78 @@ public class Game : MonoBehaviour
 	private int currentEncounterIndex;
 	private float timeToStartEncounter;
 
-	public static void StartNextEncounter()
+	private int currentFloorIndex;
+
+	private int currentTreasureIndex;
+
+	private List<Verb> items = new List<Verb>();
+	private List<Verb> treasures = new List<Verb>();
+
+	//private bool IsTreasureRoom() => currentFloorIndex % 4 == 3;
+	private bool IsTreasureRoom() => currentFloorIndex % 2 == 1;
+
+	public static List<Verb> Items => Instance.items;
+
+	public Verb GetTreasure()
 	{
-		Instance.currentEncounter.StopAllCoroutines();
-		Instance.currentEncounter = null;
-		SceneManager.LoadScene(0);
-		Instance.currentEncounterIndex += 1;
-		Instance.timeToStartEncounter = Time.time + 0.05f;
+		var treasure = treasures[currentTreasureIndex];
+		currentTreasureIndex = (currentTreasureIndex + 1) % treasures.Count;
+		return treasure;
 	}
 
-	public static void Restart()
+	public void NewGame()
 	{
-		Instance.currentEncounter.StopAllCoroutines();
-		Instance.currentEncounter = null;
+		items.Clear();
+		items.Add(new Sword());
+		items.Add(new Shield());
+		items.Add(new Wait());
+		items.Add(new Shield());
+
+		if (currentEncounter)
+		{
+			currentEncounter.StopAllCoroutines();
+			currentEncounter = null;
+		}
+		currentEncounterIndex = 0;
+		currentFloorIndex = 0;
+		timeToStartEncounter = Time.time + 0.05f;
+		player = new Player(startHp, startEnergy);
 		SceneManager.LoadScene(0);
-		Instance.currentEncounterIndex = 0;
-		Instance.timeToStartEncounter = Time.time + 0.05f;
+	}
+
+	public void NextFloor()
+	{
+		if (currentEncounter)
+		{
+			currentEncounter.StopAllCoroutines();
+			currentEncounter = null;
+		}
+		currentFloorIndex += 1;
 		Instance.ResetPlayer();
+
+		if (IsTreasureRoom())
+		{
+			SceneManager.LoadScene(1);
+		}
+		else
+		{
+			Instance.currentEncounterIndex += 1;
+			Instance.timeToStartEncounter = Time.time + 0.05f;
+			SceneManager.LoadScene(0);
+		}
 	}
 
 	private void ResetPlayer()
 	{
-		player = new Player(startHp, startEnergy);
+		var health = player.health;
+		health.hp = health.maxHp;
+		health.block = 0;
+		player.health = health;
+
+		var energy = player.energy;
+		energy.current = energy.max;
+		energy.extraNextTurn = 0;
+		player.energy = energy;
 	}
 
 	private void Awake()
@@ -58,17 +108,21 @@ public class Game : MonoBehaviour
 
 		DiceSequence = new DiceSequence(1, diceCount);
 		player = new Player(startHp, startEnergy);
+
+		
+
+		treasures.Add(new Wrath());
+
+		NewGame();
 	}
 
 	private void Update()
 	{
-		if (currentEncounter == null && Time.time > timeToStartEncounter)
-			StartEncounter(currentEncounterIndex);
-	}
-
-	private void StartEncounter(int index)
-	{
-		currentEncounter = FindObjectOfType<Encounter>();
-		currentEncounter.Begin(encounters[index % encounters.Length]);
+		if (!IsTreasureRoom() && currentEncounter == null && Time.time > timeToStartEncounter)
+		{
+			currentEncounter = FindObjectOfType<Encounter>();
+			currentEncounter.Begin(
+				encounters[Mathf.Min(currentFloorIndex, encounters.Length - 1)]);
+		}
 	}
 }

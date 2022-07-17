@@ -19,7 +19,7 @@ public class Encounter : MonoBehaviour
 	public GameState nextGameState = GameState.None;
 	
 	private List<Enemy> enemies = new List<Enemy>();
-	private List<Verb> items = new List<Verb>();
+	
 
 	public PlayerView PlayerView => playerView;
 	public int SelectedEnemy = -1;
@@ -69,17 +69,11 @@ public class Encounter : MonoBehaviour
 		hideScreen.SetValue(1);
 		StartEncounter(config);
 
-		items.Clear();
-		items.Add(new Sword());
-		itemViews[0].gameObject.SetActive(true);
-		items.Add(new Shield());
-		itemViews[1].gameObject.SetActive(true);
-		items.Add(new Wait());
-		itemViews[2].gameObject.SetActive(true);
 
-		for (int i = 0; i < items.Count; i++)
+		for (int i = 0; i < Game.Items.Count; i++)
 		{
-			items[i].Init();
+			itemViews[i].gameObject.SetActive(true);
+			Game.Items[i].Init();
 		}
 
 		UpdateViews();
@@ -98,7 +92,7 @@ public class Encounter : MonoBehaviour
 			{
 				if (Input.GetKeyDown(KeyCode.Mouse0) && HighlightedItemIndex >= 0)
 				{
-					yield return UseItem(items[HighlightedItemIndex]);
+					yield return UseItem(Game.Items[HighlightedItemIndex]);
 				}
 
 
@@ -136,7 +130,7 @@ public class Encounter : MonoBehaviour
 				{
 					enemy.PickAction();
 				}
-				foreach (var item in items)
+				foreach (var item in Game.Items)
 				{
 					if (item.InitPerTurn())
 						item.Init();
@@ -220,7 +214,7 @@ public class Encounter : MonoBehaviour
 				yield return null;
 			}
 			restartPressed = false;
-			Game.Restart();
+			Game.Instance.NewGame();
 		}
 
 		if (enemies.Count == 0)
@@ -228,21 +222,21 @@ public class Encounter : MonoBehaviour
 			UpdateViews();
 			yield return new WaitForSeconds(1);
 			float hideTime = hideScreen.Show();
-			yield return new WaitForSeconds(hideTime + 5);
-			Game.StartNextEncounter();
+			yield return new WaitForSeconds(hideTime + 1);
+			Game.Instance.NextFloor();
 		}
 	}
 
 	private void UpdateViews()
 	{
-		for (int i = 0; i < items.Count; i++)
+		for (int i = 0; i < Game.Items.Count; i++)
 		{
 			var view = itemViews[i];
-			view.Display(items[i]);
+			view.Display(Game.Items[i]);
 		}
 
-		int previewStartIndex = HighlightedItemIndex >= 0 ? 
-			items[HighlightedItemIndex].DiceCount() : 0;
+		int previewStartIndex = HighlightedItemIndex >= 0 ?
+			Game.Items[HighlightedItemIndex].DiceCount() : 0;
 
 		EnemyTurnStart = previewStartIndex;
 
@@ -287,6 +281,11 @@ public class Encounter : MonoBehaviour
 		}
 		if (health.hp < 0)
 			health.hp = 0;
+	}
+
+	public static void Heal(int amount, ref Health health)
+	{
+		health.hp = Mathf.Min(health.hp + amount, health.maxHp);
 	}
 
 	public static void AddBlock(int amount, ref Health health, Vector3 targetPosition)

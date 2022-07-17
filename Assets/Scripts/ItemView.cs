@@ -18,7 +18,13 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	Vector3 scaleVel;
 	bool pointerOver;
 
-	private bool IsHighlighted() => index == Game.CurrentEncounter.HighlightedItemIndex;
+	private bool IsHighlighted()
+	{
+		if (!Game.CurrentEncounter)
+			return false;
+
+		return index == Game.CurrentEncounter.HighlightedItemIndex; 
+	}
 
 	public void Display(Verb verb)
 	{
@@ -32,7 +38,6 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 			usesText.gameObject.SetActive(true);
 			usesText.text = verb.uses.ToString();
 			usesText.color = verb.uses > 0 ? Color.white : Color.red;
-
 		}
 		else
 		{
@@ -43,11 +48,15 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
+		if (!Game.CurrentEncounter) return;
+
 		pointerOver = true;
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		if (!Game.CurrentEncounter) return;
+
 		pointerOver = false;
 		Game.CurrentEncounter.TrySetHighlightedItem(-1);
 	}
