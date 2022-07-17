@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.55}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0.4752, y: -0.55}
+  m_SizeDelta: {x: 0.9503, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &516791740677278945
 CanvasRenderer:
@@ -92,15 +92,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.4
-  m_fontSizeBase: 0.4
+  m_fontSize: 0.6
+  m_fontSizeBase: 0.6
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -195,6 +195,7 @@ GameObject:
   - component: {fileID: 516791742319011331}
   - component: {fileID: 516791742319011329}
   - component: {fileID: 516791742319011330}
+  - component: {fileID: 237369165288330547}
   m_Layer: 5
   m_Name: Main
   m_TagString: Untagged
@@ -218,8 +219,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2.5500002, y: 1.03}
-  m_SizeDelta: {x: 2.7828, y: 2.87}
+  m_AnchoredPosition: {x: 3.1237, y: 1.03}
+  m_SizeDelta: {x: 3.9302, y: 2.87}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &516791742319011329
 CanvasRenderer:
@@ -259,6 +260,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!95 &237369165288330547
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516791742319011332}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3e5137bdc546a0441b1a63b7b9e24cc7, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1724548335704602355
 GameObject:
   m_ObjectHideFlags: 0
@@ -313,6 +333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 147098865fa6f6846994227810bdbbb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bloodParticles: {fileID: 1083640249789560923, guid: fa0b63ace23914644b86636052cf46b4, type: 3}
   selectionCatcher: {fileID: 6566227723942343791}
   spriteRenderer: {fileID: 1724548335744757832}
   nameText: {fileID: 1724548337612673162}
@@ -582,8 +603,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -0.2227}
-  m_SizeDelta: {x: 4.8267, y: 6.4254}
+  m_AnchoredPosition: {x: 0.0531, y: 1.2924997}
+  m_SizeDelta: {x: 3.5263, y: 3.395}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2157682088975900388
 CanvasRenderer:

@@ -13,10 +13,16 @@ public abstract class Verb
 
 	public abstract void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies);
 
-	public static string DiceText(int die)
+	public static string DiceText(int die, string prefix = "")
 	{
 		int index = Encounter.DieSpriteIndex(die);
-		return $"<size=1> <sprite={index}> </size>";
+		return $"<size=1>{prefix}<sprite={index}></size>";
+	}
+
+	public static string EmptySmallDiceText()
+	{
+		int index = Encounter.DieSpriteIndex(-1);
+		return $"<sprite={index}>";
 	}
 
 	public static Verb Make(EnemyAbility type)
@@ -109,7 +115,7 @@ public class EnemyDamageOrBlock : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"{DiceText(die)}\nODD: Deal X damage\nEVEN: Add X block.";
+		return $"{DiceText(die)}\nODD: Deal {EmptySmallDiceText()} damage\nEVEN: Add {EmptySmallDiceText()} block.";
 	}
 }
 
@@ -167,12 +173,11 @@ public class Wait : Verb
 {
 	public override string Name() => "Wait";
 	public override int EnergyCost() => 1;
-	public override int DiceCount() => 3;
+	public override int DiceCount() => 2;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
-		sequence.ConsumeDie();
 		sequence.ConsumeDie();
 		sequence.ConsumeDie();
 		Encounter.AddExtraEnergyNextTurn(1, ref player.energy);
@@ -182,14 +187,12 @@ public class Wait : Verb
 	{
 		int die0 = -1;
 		int die1 = -1;
-		int die2 = -1;
 		if (isPreview)
 		{
 			die0 = sequence.PeekDie(startDieIndex);
 			die1 = sequence.PeekDie(startDieIndex + 1);
-			die2 = sequence.PeekDie(startDieIndex + 2);
 		}
-		return $"{DiceText(die0)}{DiceText(die1)}{DiceText(die2)}\nGet 1 extra energy\nnext turn.";
+		return $"{DiceText(die0)} {DiceText(die1)}\nGet 1 extra energy\nnext turn.";
 	}
 }
 

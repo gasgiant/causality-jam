@@ -163,6 +163,7 @@ public class Encounter : MonoBehaviour
 		{
 			if (enemies[i].health.IsDead)
 			{
+				enemies[i].view.OnDie();
 				enemies[i].view.gameObject.SetActive(false);
 				enemies.RemoveAt(i);
 			}

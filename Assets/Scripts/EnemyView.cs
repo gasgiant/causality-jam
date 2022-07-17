@@ -5,6 +5,7 @@ using CameraShake;
 
 public class EnemyView : MonoBehaviour
 {
+	[SerializeField] private GameObject bloodParticles;
 	[SerializeField] private SelectionCatcher selectionCatcher;
 	[SerializeField] public SpriteRenderer spriteRenderer;
 	[SerializeField] private TextMeshProUGUI nameText;
@@ -13,6 +14,12 @@ public class EnemyView : MonoBehaviour
 
 	private float idleFreq = 5;
 	private float idleAmount = 0.1f;
+
+	public void OnDie()
+	{
+		Instantiate(bloodParticles,
+			spriteRenderer.transform.position + Vector3.up, Quaternion.identity);
+	}
 
 	public void Display(Enemy enemy, int index, int previewIndex)
 	{
