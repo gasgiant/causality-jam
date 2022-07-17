@@ -7,12 +7,13 @@ public class SequenceView : MonoBehaviour
 	[SerializeField] private float dieSize = 1f;
 	[SerializeField] private float spacing = 0.2f;
 	[SerializeField] private AnimationCurve moveCurve;
+	[SerializeField] private Color enemyHighlight;
+	[SerializeField] private Color playerHighlight;
 	private SpriteRenderer[] renderers;
 	private int diceCount;
 	private DiceSequence diceSequence;
 	private int previousDiceConsumed;
 	private Vector3 offset;
-
 
 	void Start()
     {
@@ -90,7 +91,7 @@ public class SequenceView : MonoBehaviour
 			renderers[i].color = Color.white;
 			if (i < enemyStart)
 			{
-				renderers[i].color = new Color(0.95f, 0.85f, 0.1f);
+				renderers[i].color = playerHighlight;
 				renderers[i].transform.localScale = Vector3.one * 1.2f;
 			}
 			else
@@ -100,7 +101,7 @@ public class SequenceView : MonoBehaviour
 
 			if (i >= enemyStart && i < enemyEnd)
 			{
-				renderers[i].color = Color.red;
+				renderers[i].color = enemyHighlight;
 			}
 		}
 	}

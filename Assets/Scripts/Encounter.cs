@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Encounter : MonoBehaviour
 {
+	[SerializeField] Button passTurnButton;
 	[SerializeField] PointerArrow pointerArrow;
 	[SerializeField] PlayerView playerView;
 	[SerializeField] GameObject shieldParticle;
 	[SerializeField, NonReorderable] ItemView[] itemViews;
-	[SerializeField, NonReorderable] EnemyView[] enemyViews;
+	[SerializeField] EnemyView[] enemyViews;
 	public enum GameState { None, PlayerTurn, EnemyTurn }
 
 	public GameState currentGameState = GameState.PlayerTurn;
@@ -25,11 +27,17 @@ public class Encounter : MonoBehaviour
 
 	public int EnemyTurnStart { get; private set; }
 	public int EnemyTurnEnd { get; private set; }
+	bool passTurnPressed;
 
 	public void TrySetHighlightedItem(int index)
 	{
 		if (!blockSetHighlightedItem)
 			HighlightedItemIndex = index;
+	}
+
+	public void PassTurn()
+	{
+		passTurnPressed = true;
 	}
 
 	private void OnEnable()
@@ -83,8 +91,10 @@ public class Encounter : MonoBehaviour
 
 
 				UpdateViews();
-				if (Input.GetKeyDown(KeyCode.Space))
+				if (Input.GetKeyDown(KeyCode.Space) || passTurnPressed)
 				{
+					passTurnPressed = false;
+					passTurnButton.interactable = false;
 					nextGameState = GameState.EnemyTurn;
 				}
 			}
@@ -108,6 +118,7 @@ public class Encounter : MonoBehaviour
 			{
 				nextGameState = GameState.None;
 				currentGameState = GameState.PlayerTurn;
+				passTurnButton.interactable = true;
 
 				foreach (var enemy in enemies)
 				{
@@ -162,7 +173,10 @@ public class Encounter : MonoBehaviour
 			}
 
 			if (valid)
+			{
 				yield return DoVerb(item, SelectedEnemy, -1);
+				yield return new WaitForSeconds(0.3f);
+			}
 		}
 	}
 
