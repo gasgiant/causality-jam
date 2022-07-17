@@ -24,6 +24,7 @@ public class Encounter : MonoBehaviour
 	public int HighlightedItemIndex { get; private set; } = -1;
 	public bool blockSetHighlightedItem = false;
 	public bool IsSelectingTarget { get; private set; } = false;
+	public bool WaitingForItemConfirm { get; private set; } = false;
 
 	public int EnemyTurnStart { get; private set; }
 	public int EnemyTurnEnd { get; private set; }
@@ -154,13 +155,15 @@ public class Encounter : MonoBehaviour
 				IsSelectingTarget = true;
 				pointerArrow.gameObject.SetActive(true);
 			}
+
+			WaitingForItemConfirm = true;
 			while (Input.GetKey(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Mouse1))
 			{
 				UpdateViews();
 				pointerArrow.Display(itemViews[HighlightedItemIndex].transform.position);
 				yield return null;
 			}
-
+			WaitingForItemConfirm = false;
 			pointerArrow.gameObject.SetActive(false);
 			blockSetHighlightedItem = false;
 			HighlightedItemIndex = -1;

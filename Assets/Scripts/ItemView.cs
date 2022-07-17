@@ -1,10 +1,15 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
 	[SerializeField] private int index;
+
+	[SerializeField] private Color[] incactive;
+	[SerializeField] private Color[] active;
+	[SerializeField] private Image[] backgrounds;
 	[SerializeField] private TextMeshProUGUI nameText;
 	[SerializeField] private TextMeshProUGUI descriptionText;
 	[SerializeField] private TextMeshProUGUI costText;
@@ -54,6 +59,21 @@ public class ItemView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		if (pointerOver)
 		{
 			Game.CurrentEncounter.TrySetHighlightedItem(index);
+		}
+
+		if (Game.CurrentEncounter.WaitingForItemConfirm && index == Game.CurrentEncounter.HighlightedItemIndex)
+		{
+			for (int i = 0; i < backgrounds.Length; i++)
+			{
+				backgrounds[i].color = active[i];
+			}
+		}
+		else
+		{
+			for (int i = 0; i < backgrounds.Length; i++)
+			{
+				backgrounds[i].color = incactive[i];
+			}
 		}
 
 		Vector3 targetScale = IsHighlighted() ? Vector3.one * 1.15f : Vector3.one;
