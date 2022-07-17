@@ -59,6 +59,11 @@ public class Encounter : MonoBehaviour
 		items.Add(new Wait());
 		itemViews[2].gameObject.SetActive(true);
 
+		for (int i = 0; i < items.Count; i++)
+		{
+			items[i].Init();
+		}
+
 		UpdateViews();
 
 		StartCoroutine(Tick());
@@ -108,6 +113,11 @@ public class Encounter : MonoBehaviour
 				{
 					enemy.PickAction();
 				}
+				foreach (var item in items)
+				{
+					if (item.InitPerTurn())
+						item.Init();
+				}
 
 				RestoreEnergy(ref Game.Player.energy);
 			}
@@ -124,7 +134,8 @@ public class Encounter : MonoBehaviour
 
 	private IEnumerator UseItem(Verb item)
 	{
-		if (item.EnergyCost() <= Game.Player.energy.current)
+		if (item.EnergyCost() <= Game.Player.energy.current 
+			&& (item.MaxUses() < 0 || item.uses > 0))
 		{
 			blockSetHighlightedItem = true;
 			if (item.IsTargetable())

@@ -8,6 +8,15 @@ public abstract class Verb
 	public abstract int DiceCount();
 	public virtual int EnergyCost() => 0;
 	public virtual bool IsTargetable() => false;
+	public virtual int MaxUses() => -1;
+	public virtual bool InitPerTurn() => true;
+
+	public virtual void Init()
+	{
+		uses = MaxUses();
+	}
+
+	public int uses;
 
 	public abstract string Description(bool b, int startDieIndex, DiceSequence sequence);
 
@@ -97,7 +106,7 @@ public class EnemyDamageOrBlock : Verb
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		int die = sequence.ConsumeDie();
-		if (die % 2 == 0)
+		if (die % 2 != 0)
 		{
 			var damage = new Damage(die);
 			Game.CurrentEncounter.PlayerView.TakeHit();
@@ -141,7 +150,7 @@ public class Sword : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"Deal {DiceText(die)} damage.";
+		return $"Deal  {DiceText(die)}  damage.";
 	}
 }
 
@@ -165,34 +174,32 @@ public class Shield : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"Add {DiceText(die)} block.";
+		return $"Add  {DiceText(die)}  block.";
 	}
 }
 
 public class Wait : Verb
 {
 	public override string Name() => "Wait";
-	public override int EnergyCost() => 1;
-	public override int DiceCount() => 2;
+	public override int EnergyCost() => 0;
+	public override int DiceCount() => 1;
+	public override int MaxUses() => 3;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
+		uses -= 1;
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		sequence.ConsumeDie();
-		sequence.ConsumeDie();
-		Encounter.AddExtraEnergyNextTurn(1, ref player.energy);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
 	{
 		int die0 = -1;
-		int die1 = -1;
 		if (isPreview)
 		{
 			die0 = sequence.PeekDie(startDieIndex);
-			die1 = sequence.PeekDie(startDieIndex + 1);
 		}
-		return $"{DiceText(die0)} {DiceText(die1)}\nGet 1 extra energy\nnext turn.";
+		return $"{DiceText(die0)}";
 	}
 }
 

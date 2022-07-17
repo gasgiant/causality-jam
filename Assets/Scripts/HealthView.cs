@@ -10,5 +10,7 @@ public class HealthView : MonoBehaviour
 	{
 		hpText.text = $"{health.hp}/{health.maxHp}";
 		blockText.text = $"{health.block}";
+
+		blockText.gameObject.SetActive(health.block > 0);
 	}
 }
