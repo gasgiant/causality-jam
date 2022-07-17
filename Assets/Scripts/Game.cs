@@ -5,11 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class Game : MonoBehaviour
 {
+	private System.Random rand;
+
 	public static Game Instance { get; private set; }
 	public static Player Player => Instance.player;
 	public static Encounter CurrentEncounter => Instance.currentEncounter;
 
 	public GameObject healParticle;
+	[SerializeField] private GameObject sequenceView;
 	[SerializeField] private int debugStartEnc = 0;
 	[SerializeField] private int diceCount = 12;
 	[SerializeField] private int startHp = 36;
@@ -52,7 +55,7 @@ public class Game : MonoBehaviour
 	private int currentTreasureIndex;
 
 	private List<Verb> items = new List<Verb>();
-	private List<Verb> treasures = new List<Verb>();
+	private Verb[] treasures;
 
 	private int[] restFloors = { 2, 6, 10 };
 	private bool IsTreasureRoom()
@@ -80,29 +83,38 @@ public class Game : MonoBehaviour
 		Instance = this;
 		DontDestroyOnLoad(gameObject);
 
+		int seed = Random.Range(0, 10000);
+
 		AudioManager.Instance.PlayMenuMusic();
-		DiceSequence = new DiceSequence(1, diceCount);
+		DiceSequence = new DiceSequence(seed, diceCount);
 		player = new Player(startHp, startEnergy);
 
-		treasures.Add(new Bite());
-		treasures.Add(new Armor());
-		treasures.Add(new Stash());
-		treasures.Add(new Warhammer());
-		treasures.Add(new Zweihander());
-		treasures.Add(new OakShield());
-		treasures.Add(new Bomb());
-		treasures.Add(new Cannon());
+		rand = new System.Random(seed);
+
+		treasures = new Verb[]
+		{
+			new Bite(),
+			new Armor(),
+			new Stash(),
+			new Warhammer(),
+			new Zweihander(),
+			new OakShield(),
+			new Bomb(),
+			new Cannon()
+		};
 	}
 
 	public Verb GetTreasure()
 	{
 		var treasure = treasures[currentTreasureIndex];
-		currentTreasureIndex = (currentTreasureIndex + 1) % treasures.Count;
+		currentTreasureIndex = (currentTreasureIndex + 1) % treasures.Length;
 		return treasure;
 	}
 
 	public void NewGame()
 	{
+		rand.Shuffle(treasures);
+		sequenceView.SetActive(true);
 		AudioManager.Instance.PlayBattleMusic();
 		int seed = 1;
 
@@ -118,7 +130,7 @@ public class Game : MonoBehaviour
 		items.Add(new Sword());
 		items.Add(new Shield());
 		items.Add(new Wait());
-		items.Add(new Bite());
+		//items.Add(new Bite());
 
 		if (currentEncounter)
 		{

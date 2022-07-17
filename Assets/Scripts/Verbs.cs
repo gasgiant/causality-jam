@@ -171,7 +171,7 @@ public class EnemyDamageTwo : Verb
 		if (isPreview)
 		{
 			die0 = sequence.PeekDie(startDieIndex);
-			die1 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
 		}
 		return $"Deals {DiceText(die0)} {DiceText(die1)} damage.";
 	}
@@ -193,7 +193,7 @@ public class EnemyBlockTwo : Verb
 		if (isPreview)
 		{
 			die0 = sequence.PeekDie(startDieIndex);
-			die1 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
 		}
 		return $"Adds {DiceText(die0)} {DiceText(die1)} block.";
 	}
@@ -428,7 +428,7 @@ public class Zweihander : Verb
 public class Cannon : Verb
 {
 	public override string Name() => "Cannon";
-	public override int EnergyCost() => 2;
+	public override int EnergyCost() => 1;
 	public override int DiceCount() => 2;
 	public override bool IsTargetable() => true;
 
@@ -447,7 +447,6 @@ public class Cannon : Verb
 		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
 		enemies[targetIndex].view.TakeHit();
 		CameraShaker.Presets.ShortShake2D();
-		Encounter.AddBlock(die1, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)

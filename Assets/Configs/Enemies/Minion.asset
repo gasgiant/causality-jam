@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 272ec5717d22ec54abbcb2cb6b39d545, type: 3}
   m_Name: Minion
   m_EditorClassIdentifier: 
-  displayName: Minion
+  displayName: Peep
   sprite: {fileID: 21300000, guid: 1e1d99befdcab48e2998733bad9aa6b9, type: 3}
   maxHp: 27
   verbs: 030000000100000004000000

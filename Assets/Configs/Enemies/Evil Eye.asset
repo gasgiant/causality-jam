@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 272ec5717d22ec54abbcb2cb6b39d545, type: 3}
   m_Name: Evil Eye
   m_EditorClassIdentifier: 
-  displayName: Evil Eye
+  displayName: The Overseer
   sprite: {fileID: 21300000, guid: ff5124bfb7f0e4eb7b18a1c1e9ca3283, type: 3}
   maxHp: 84
   verbs: 050000000600000007000000

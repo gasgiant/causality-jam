@@ -8,6 +8,13 @@ public class FadeCanvasGroup : MonoBehaviour
 	public CanvasGroup canvasGroup;
 	public float duration = 0.5f;
 
+	public void HardSet(float value)
+	{
+		StopAllCoroutines();
+		canvasGroup.alpha = value;
+		canvasGroup.gameObject.SetActive(true);
+	}
+
 	public float Show()
 	{
 		gameObject.SetActive(true);

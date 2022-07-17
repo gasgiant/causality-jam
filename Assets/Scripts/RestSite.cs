@@ -64,6 +64,7 @@ public class RestSite : MonoBehaviour
 			itemViews[i].gameObject.SetActive(true);
 			Game.Items[i].Init();
 		}
+		treasure.Init();
 
 		StartCoroutine(Tick());
 	}
