@@ -18,6 +18,8 @@ public abstract class Verb
 
 	public int uses;
 
+	protected static int dieTextSize = 1;
+
 	public abstract string Description(bool b, int startDieIndex, DiceSequence sequence);
 
 	public abstract void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies);
@@ -25,7 +27,7 @@ public abstract class Verb
 	public static string DiceText(int die, string prefix = "")
 	{
 		int index = Encounter.DieSpriteIndex(die);
-		return $"<size=1>{prefix}<sprite={index}></size>";
+		return $"<size={dieTextSize}>{prefix}<sprite={index}></size>";
 	}
 
 	public static string EmptySmallDiceText()
@@ -203,31 +205,39 @@ public class Wait : Verb
 	}
 }
 
-public class Whip : Verb
+public class Wrath : Verb
 {
-	public override string Name() => "Whip";
+	public override string Name() => "Wrath";
 	public override int EnergyCost() => 2;
-	public override int DiceCount() => 1;
+	public override int DiceCount() => 2;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
-		var damage = new Damage(sequence.ConsumeDie());
-		for (int i = 0; i < enemies.Count; i++)
+		int die0 = sequence.ConsumeDie();
+		int die1 = sequence.ConsumeDie();
+		if (die0 == die1)
 		{
-			Encounter.DealDamage(damage, ref enemies[i].health);
-			enemies[i].view.TakeHit();
+			var damage = new Damage(die0 + die1);
+			for (int i = 0; i < enemies.Count; i++)
+			{
+				Encounter.DealDamage(damage, ref enemies[i].health);
+				enemies[i].view.TakeHit();
+			}
+			CameraShaker.Presets.Explosion2D();
 		}
-		
-		CameraShaker.Presets.Explosion2D();
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
 	{
-		int die = -1;
+		int die0 = -1;
+		int die1 = -1;
 		if (isPreview)
-			die = sequence.PeekDie(startDieIndex);
-		return $"Deal {DiceText(die)} damage\nto all enemies.";
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+		}
+		return $"IF PAIR\nDeal  {DiceText(die0)}  {DiceText(die1)}   damage\nto all enemies.";
 	}
 }
 

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Encounter : MonoBehaviour
 {
+	[SerializeField] FadeCanvasGroup deathScreen;
+	[SerializeField] HideScreenImageEffect hideScreen;
 	[SerializeField] Button passTurnButton;
 	[SerializeField] PointerArrow pointerArrow;
 	[SerializeField] PlayerView playerView;
@@ -29,6 +31,7 @@ public class Encounter : MonoBehaviour
 	public int EnemyTurnStart { get; private set; }
 	public int EnemyTurnEnd { get; private set; }
 	bool passTurnPressed;
+	bool restartPressed = false;
 
 	public void TrySetHighlightedItem(int index)
 	{
@@ -39,6 +42,11 @@ public class Encounter : MonoBehaviour
 	public void PassTurn()
 	{
 		passTurnPressed = true;
+	}
+
+	public void Restart()
+	{
+		restartPressed = true;
 	}
 
 	private void OnEnable()
@@ -58,6 +66,7 @@ public class Encounter : MonoBehaviour
 
 	public void Begin(EncounterConfig config)
 	{
+		hideScreen.SetValue(1);
 		StartEncounter(config);
 
 		items.Clear();
@@ -80,6 +89,8 @@ public class Encounter : MonoBehaviour
 
 	private IEnumerator Tick()
 	{
+		yield return new WaitForSeconds(hideScreen.Hide());
+
 		while (true)
 		{
 			// states
@@ -201,6 +212,14 @@ public class Encounter : MonoBehaviour
 		{
 			UpdateViews();
 			yield return new WaitForSeconds(1);
+			float hideTime = hideScreen.Show();
+			yield return new WaitForSeconds(0.5f);
+			deathScreen.Show();
+			while (!restartPressed)
+			{
+				yield return null;
+			}
+			restartPressed = false;
 			Game.Restart();
 		}
 
@@ -208,6 +227,8 @@ public class Encounter : MonoBehaviour
 		{
 			UpdateViews();
 			yield return new WaitForSeconds(1);
+			float hideTime = hideScreen.Show();
+			yield return new WaitForSeconds(hideTime + 5);
 			Game.StartNextEncounter();
 		}
 	}
