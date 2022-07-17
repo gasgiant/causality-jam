@@ -29,10 +29,10 @@ public class Game : MonoBehaviour
 	private List<Verb> items = new List<Verb>();
 	private List<Verb> treasures = new List<Verb>();
 
-	//private bool IsTreasureRoom() => currentFloorIndex % 4 == 3;
-	private bool IsTreasureRoom() => currentFloorIndex % 2 == 1;
+	private bool IsTreasureRoom() => currentFloorIndex % 4 == 3;
 
 	public static List<Verb> Items => Instance.items;
+	private bool gameStarted = false;
 
 	public Verb GetTreasure()
 	{
@@ -43,11 +43,11 @@ public class Game : MonoBehaviour
 
 	public void NewGame()
 	{
+		gameStarted = true;
 		items.Clear();
 		items.Add(new Sword());
 		items.Add(new Shield());
 		items.Add(new Wait());
-		items.Add(new Shield());
 
 		if (currentEncounter)
 		{
@@ -58,7 +58,7 @@ public class Game : MonoBehaviour
 		currentFloorIndex = 0;
 		timeToStartEncounter = Time.time + 0.05f;
 		player = new Player(startHp, startEnergy);
-		SceneManager.LoadScene(0);
+		SceneManager.LoadScene(1);
 	}
 
 	public void NextFloor()
@@ -73,13 +73,13 @@ public class Game : MonoBehaviour
 
 		if (IsTreasureRoom())
 		{
-			SceneManager.LoadScene(1);
+			SceneManager.LoadScene(2);
 		}
 		else
 		{
 			Instance.currentEncounterIndex += 1;
 			Instance.timeToStartEncounter = Time.time + 0.05f;
-			SceneManager.LoadScene(0);
+			SceneManager.LoadScene(1);
 		}
 	}
 
@@ -109,16 +109,12 @@ public class Game : MonoBehaviour
 		DiceSequence = new DiceSequence(1, diceCount);
 		player = new Player(startHp, startEnergy);
 
-		
-
 		treasures.Add(new Wrath());
-
-		NewGame();
 	}
 
 	private void Update()
 	{
-		if (!IsTreasureRoom() && currentEncounter == null && Time.time > timeToStartEncounter)
+		if (gameStarted && !IsTreasureRoom() && currentEncounter == null && Time.time > timeToStartEncounter)
 		{
 			currentEncounter = FindObjectOfType<Encounter>();
 			currentEncounter.Begin(
