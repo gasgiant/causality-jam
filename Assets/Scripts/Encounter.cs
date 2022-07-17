@@ -90,6 +90,15 @@ public class Encounter : MonoBehaviour
 			// states
 			if (currentGameState == GameState.PlayerTurn)
 			{
+				if (Input.GetKeyDown(KeyCode.W) 
+					&& Input.GetKey(KeyCode.LeftShift)
+					&& Input.GetKey(KeyCode.LeftControl))
+				{
+					float hideTime = hideScreen.Show();
+					yield return new WaitForSeconds(hideTime + 0.5f);
+					Game.Instance.NextFloor();
+				}
+
 				if (Input.GetKeyDown(KeyCode.Mouse0) && HighlightedItemIndex >= 0)
 				{
 					yield return UseItem(Game.Items[HighlightedItemIndex]);
@@ -230,7 +239,7 @@ public class Encounter : MonoBehaviour
 			UpdateViews();
 			yield return new WaitForSeconds(1);
 			float hideTime = hideScreen.Show();
-			yield return new WaitForSeconds(hideTime + 1);
+			yield return new WaitForSeconds(hideTime + 0.5f);
 			Game.Instance.NextFloor();
 		}
 	}

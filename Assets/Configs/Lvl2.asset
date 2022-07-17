@@ -10,7 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d7eac8e6542fe504d8893daee7bccf11, type: 3}
-  m_Name: Test
+  m_Name: Lvl2
   m_EditorClassIdentifier: 
   encounters:
+  - {fileID: 11400000, guid: 7f22d199112df5943b1f443ca3b1095c, type: 2}
+  - {fileID: 11400000, guid: 362a361f1d8e98746a094a6b80ebb61c, type: 2}
+  - {fileID: 11400000, guid: 6815421ef1e152a4bb00c7fe4958fec4, type: 2}
   - {fileID: 11400000, guid: 3b6bd0b979655e74fa199fb6f5fe260f, type: 2}

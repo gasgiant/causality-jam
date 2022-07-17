@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Skeleton
   sprite: {fileID: 21300000, guid: 642035d1ad6054d4c81d469682e27df3, type: 3}
-  maxHp: 30
+  maxHp: 27
   verbs: 04000000
   idleFreq: 5
   idleAmount: 0.2

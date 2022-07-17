@@ -6,7 +6,12 @@ public class TitleScript : MonoBehaviour
 {
 	public HideScreenImageEffect hideScreen;
 
-    public void Play()
+	private void Awake()
+	{
+		hideScreen.SetValue(0);
+	}
+
+	public void Play()
 	{
 		hideScreen.SetValue(0);
 		StartCoroutine(BeginSequence());

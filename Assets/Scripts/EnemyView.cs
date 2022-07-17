@@ -23,6 +23,7 @@ public class EnemyView : MonoBehaviour
 
 	public void Display(Enemy enemy, int index, int previewIndex)
 	{
+		if (!Game.CurrentEncounter) return;
 		if (enemy == null) return;
 		idleFreq = enemy.config.idleFreq;
 		idleAmount = enemy.config.idleAmount;

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Mooseman
   sprite: {fileID: 21300000, guid: 4224e0ae60f354990b0b328ad39ecad7, type: 3}
-  maxHp: 12
-  verbs: 00000000
+  maxHp: 37
+  verbs: 0700000005000000
   idleFreq: 3
   idleAmount: 0.1

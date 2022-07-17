@@ -54,6 +54,12 @@ public abstract class Verb
 			return new EnemyDoubleDamageOdd();
 		if (type == EnemyAbility.DamagePlusConditionalBlock)
 			return new EnemyDamagePlusConditionalBlock();
+		if (type == EnemyAbility.DamageTwo)
+			return new EnemyDamageTwo();
+		if (type == EnemyAbility.BlockTwo)
+			return new EnemyBlockTwo();
+		if (type == EnemyAbility.AoeHeal)
+			return new EnemyHealAoE();
 		return null;
 	}
 }
@@ -64,7 +70,10 @@ public enum EnemyAbility
 	DamageOnOne,
 	DamageOrBlock,
 	DoubleDamageOdd,
-	DamagePlusConditionalBlock
+	DamagePlusConditionalBlock,
+	DamageTwo,
+	BlockTwo,
+	AoeHeal
 }
 
 public class EnemyDamage : Verb
@@ -85,6 +94,53 @@ public class EnemyDamage : Verb
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
 		return $"Deals {DiceText(die)} damage.";
+	}
+}
+
+public class EnemyDamageTwo : Verb
+{
+	public override int DiceCount() => 2;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		var damage = new Damage(sequence.ConsumeDie() + sequence.ConsumeDie());
+		Game.CurrentEncounter.PlayerView.TakeHit();
+		enemies[selfIndex].view.Attack();
+		Encounter.DealDamage(damage, ref player.health);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex);
+		}
+		return $"Deals {DiceText(die0)} {DiceText(die1)} damage.";
+	}
+}
+
+public class EnemyBlockTwo : Verb
+{
+	public override int DiceCount() => 2;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.AddBlock(sequence.ConsumeDie() + sequence.ConsumeDie(), ref enemies[selfIndex].health, enemies[selfIndex].view.spriteRenderer.transform.position + Vector3.up);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex);
+		}
+		return $"Adds {DiceText(die0)} {DiceText(die1)} block.";
 	}
 }
 
@@ -122,13 +178,16 @@ public class EnemyDoubleDamageOdd : Verb
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
 		int die = sequence.ConsumeDie();
+		int dmg = die;
 		if (die % 2 == 1)
 		{
-			var damage = new Damage(die * 2);
-			Game.CurrentEncounter.PlayerView.TakeHit();
-			enemies[selfIndex].view.Attack();
-			Encounter.DealDamage(damage, ref player.health);
+			dmg *= 2;
 		}
+
+		var damage = new Damage(dmg);
+		Game.CurrentEncounter.PlayerView.TakeHit();
+		enemies[selfIndex].view.Attack();
+		Encounter.DealDamage(damage, ref player.health);
 	}
 
 	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
@@ -137,7 +196,7 @@ public class EnemyDoubleDamageOdd : Verb
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
 		//return $"ODD:\nDeal {DiceText(die)} x 2\n damage.";
-		return $"{DiceText(die)}\nODD:\nDeals {EmptySmallDiceText()} x 2 damage.";
+		return $"Deals {DiceText(die)} damage.\nIF ODD:\nDouble damage.";
 	}
 }
 
@@ -151,7 +210,7 @@ public class EnemyDamageOnOne : Verb
 		int dmg = die;
 		if (die == 1)
 		{
-			dmg += 6;
+			dmg += 12;
 		}
 		var damage = new Damage(dmg);
 		Game.CurrentEncounter.PlayerView.TakeHit();
@@ -164,7 +223,34 @@ public class EnemyDamageOnOne : Verb
 		int die = -1;
 		if (isPreview)
 			die = sequence.PeekDie(startDieIndex);
-		return $"Deals {DiceText(die)} damage.\nON {DiceInvertedText(1)}\nDeals 6 more\ndamage.";
+		return $"Deals {DiceText(die)} damage.\nON {DiceInvertedText(1)}\nDeals 12 more\ndamage.";
+	}
+}
+
+public class EnemyHealAoE : Verb
+{
+	public override int DiceCount() => 1;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		int die = sequence.ConsumeDie();
+
+		if (die >= 3)
+		{
+			for (int i = 0; i < enemies.Count; i++)
+			{
+				Encounter.Heal(6, ref enemies[i].health);
+				//Encounter.AddBlock(sequence.ConsumeDie() + sequence.ConsumeDie(), ref enemies[selfIndex].health, enemies[selfIndex].view.spriteRenderer.transform.position + Vector3.up);
+			}
+		}
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"{DiceText(die)}\nON {DiceInvertedText(3)} +\nHeals all for 6.";
 	}
 }
 
@@ -223,6 +309,139 @@ public class Sword : Verb
 	}
 }
 
+public class Bite : Verb
+{
+	public override string Name() => "Bite";
+	public override int EnergyCost() => 1;
+	public override int DiceCount() => 1;
+	public override bool IsTargetable() => true;
+
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		int die = sequence.ConsumeDie();
+		var damage = new Damage(die);
+		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
+		if (die >= 4)
+			Encounter.Heal(3, ref player.health);
+		enemies[targetIndex].view.TakeHit();
+		CameraShaker.Presets.ShortShake2D();
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"Deal  {DiceText(die)}  damage.\nON {DiceInvertedText(4)} +\nHeal 3 hp.";
+	}
+}
+
+public class Zweihander : Verb
+{
+	public override string Name() => "Zweihander";
+	public override int EnergyCost() => 2;
+	public override int DiceCount() => 2;
+	public override bool IsTargetable() => true;
+
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		int die0 = sequence.ConsumeDie();
+		int die1 = sequence.ConsumeDie();
+		var damage = new Damage(die0 * 2);
+		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
+		enemies[targetIndex].view.TakeHit();
+		CameraShaker.Presets.ShortShake2D();
+		Encounter.AddBlock(die1, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+		}
+		return $"Deal  {DiceText(die0)} x 2  damage.\nAdd  {DiceText(die1)}  block.";
+	}
+}
+
+public class Cannon : Verb
+{
+	public override string Name() => "Cannon";
+	public override int EnergyCost() => 2;
+	public override int DiceCount() => 2;
+	public override bool IsTargetable() => true;
+
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		int die0 = sequence.ConsumeDie();
+		int die1 = sequence.ConsumeDie();
+		int dmg = die0 + die1;
+		if (die0 == die1)
+		{
+			dmg *= 2;
+		}
+		var damage = new Damage(dmg);
+		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
+		enemies[targetIndex].view.TakeHit();
+		CameraShaker.Presets.ShortShake2D();
+		Encounter.AddBlock(die1, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+		}
+		return $"Deal  {DiceText(die0)} {DiceText(die1)}  damage,\nIF PAIR:\nDouble damage.";
+	}
+}
+
+public class Warhammer : Verb
+{
+	public override string Name() => "Warhammer";
+	public override int EnergyCost() => 2;
+	public override int DiceCount() => 2;
+	public override bool IsTargetable() => true;
+
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		int die0 = sequence.ConsumeDie();
+		int die1 = sequence.ConsumeDie();
+		var damage = new Damage(die0);
+		Encounter.DealDamage(damage, ref enemies[targetIndex].health);
+		enemies[targetIndex].view.TakeHit();
+		CameraShaker.Presets.ShortShake2D();
+		Encounter.AddBlock(die1 * 2, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+		}
+		return $"Deal  {DiceText(die0)}  damage.\nAdd  {DiceText(die1)} x 2  block.";
+	}
+}
+
 public class Shield : Verb
 {
 	public override string Name() => "Shield";
@@ -247,12 +466,67 @@ public class Shield : Verb
 	}
 }
 
+public class OakShield : Verb
+{
+	public override string Name() => "Oak Shield";
+	public override int EnergyCost() => 1;
+	public override int DiceCount() => 2;
+	public override bool IsTargetable() => false;
+	public override int MaxUses() => 1;
+
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		uses -= 1;
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		int die0 = sequence.ConsumeDie();
+		int die1 = sequence.ConsumeDie();
+		Encounter.AddBlock(die0 + die1, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die0 = -1;
+		int die1 = -1;
+		if (isPreview)
+		{
+			die0 = sequence.PeekDie(startDieIndex);
+			die1 = sequence.PeekDie(startDieIndex + 1);
+		}
+		return $"Add  {DiceText(die0)} {DiceText(die1)}  block.";
+	}
+}
+
+public class Armor : Verb
+{
+	public override string Name() => "Plate Armor";
+	public override int EnergyCost() => 1;
+	public override int DiceCount() => 1;
+	public override bool IsTargetable() => false;
+
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		int die = sequence.ConsumeDie();
+		Encounter.AddBlock(5, ref player.health, Game.CurrentEncounter.PlayerView.spriteRenderer.transform.position);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		int die = -1;
+		if (isPreview)
+			die = sequence.PeekDie(startDieIndex);
+		return $"{DiceText(die)}\nAdd  5  block.";
+	}
+}
+
 public class Wait : Verb
 {
 	public override string Name() => "Wait";
 	public override int EnergyCost() => 0;
 	public override int DiceCount() => 1;
-	public override int MaxUses() => 3;
+	public override int MaxUses() => 2;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
@@ -272,10 +546,28 @@ public class Wait : Verb
 	}
 }
 
-public class Wrath : Verb
+public class Stash : Verb
 {
-	public override string Name() => "Wrath";
-	public override int EnergyCost() => 2;
+	public override string Name() => "Stash";
+	public override int EnergyCost() => 1;
+	public override int DiceCount() => 0;
+
+	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
+	{
+		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
+		Encounter.AddExtraEnergyNextTurn(1, ref player.energy);
+	}
+
+	public override string Description(bool isPreview, int startDieIndex, DiceSequence sequence)
+	{
+		return $"Add 1 extra\nenergy\nnext turn.";
+	}
+}
+
+public class Bomb : Verb
+{
+	public override string Name() => "Bomb";
+	public override int EnergyCost() => 0;
 	public override int DiceCount() => 2;
 
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)

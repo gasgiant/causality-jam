@@ -21,6 +21,8 @@ public class Game : MonoBehaviour
 			return encounterPools[0].GetEncounterConfig();
 		if (currentEncounterIndex + debugStartEnc < 5)
 			return encounterPools[1].GetEncounterConfig();
+		if (currentEncounterIndex + debugStartEnc < 8)
+			return encounterPools[2].GetEncounterConfig();
 
 		return encounterPools[encounterPools.Length - 1].GetEncounterConfig();
 	}
@@ -41,9 +43,34 @@ public class Game : MonoBehaviour
 	private List<Verb> treasures = new List<Verb>();
 
 	private bool IsTreasureRoom() => currentFloorIndex % 4 == 3;
+	//private bool IsTreasureRoom() => currentFloorIndex % 2 == 1;
 
 	public static List<Verb> Items => Instance.items;
 	private bool gameStarted = false;
+
+	private void Awake()
+	{
+		if (Instance != null)
+		{
+			Destroy(gameObject);
+			return;
+		}
+		Instance = this;
+		DontDestroyOnLoad(gameObject);
+
+		AudioManager.Instance.PlayMenuMusic();
+		DiceSequence = new DiceSequence(1, diceCount);
+		player = new Player(startHp, startEnergy);
+
+		treasures.Add(new Bite());
+		treasures.Add(new Armor());
+		treasures.Add(new Stash());
+		treasures.Add(new Warhammer());
+		treasures.Add(new Zweihander());
+		treasures.Add(new OakShield());
+		treasures.Add(new Bomb());
+		treasures.Add(new Cannon());
+	}
 
 	public Verb GetTreasure()
 	{
@@ -54,6 +81,7 @@ public class Game : MonoBehaviour
 
 	public void NewGame()
 	{
+		AudioManager.Instance.PlayBattleMusic();
 		int seed = 1;
 
 		//DiceSequence = new DiceSequence(seed, diceCount);
@@ -68,6 +96,7 @@ public class Game : MonoBehaviour
 		items.Add(new Sword());
 		items.Add(new Shield());
 		items.Add(new Wait());
+		//items.Add(new Zweihander());
 
 		if (currentEncounter)
 		{
@@ -115,21 +144,7 @@ public class Game : MonoBehaviour
 		player.energy = energy;
 	}
 
-	private void Awake()
-	{
-		if (Instance != null)
-		{
-			Destroy(gameObject);
-			return;
-		}
-		Instance = this;
-		DontDestroyOnLoad(gameObject);
-
-		DiceSequence = new DiceSequence(1, diceCount);
-		player = new Player(startHp, startEnergy);
-
-		treasures.Add(new Wrath());
-	}
+	
 
 	private void Update()
 	{
