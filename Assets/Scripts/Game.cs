@@ -116,7 +116,7 @@ public class Game : MonoBehaviour
 		rand.Shuffle(treasures);
 		sequenceView.SetActive(true);
 		AudioManager.Instance.PlayBattleMusic();
-		int seed = 1;
+		int seed = Random.Range(0, 100000);
 
 		//DiceSequence = new DiceSequence(seed, diceCount);
 
