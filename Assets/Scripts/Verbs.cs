@@ -428,7 +428,7 @@ public class Zweihander : Verb
 public class Cannon : Verb
 {
 	public override string Name() => "Cannon";
-	public override int EnergyCost() => 1;
+	public override int EnergyCost() => 2;
 	public override int DiceCount() => 2;
 	public override bool IsTargetable() => true;
 
@@ -648,8 +648,11 @@ public class Bomb : Verb
 	public override int EnergyCost() => 0;
 	public override int DiceCount() => 2;
 
+	public override int MaxUses() => 1;
+
 	public override void Execute(DiceSequence sequence, int targetIndex, int selfIndex, Player player, List<Enemy> enemies)
 	{
+		uses -= 1;
 		Encounter.SpendEnergy(EnergyCost(), ref player.energy);
 		int die0 = sequence.ConsumeDie();
 		int die1 = sequence.ConsumeDie();

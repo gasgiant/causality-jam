@@ -130,7 +130,7 @@ public class Game : MonoBehaviour
 		items.Add(new Sword());
 		items.Add(new Shield());
 		items.Add(new Wait());
-		//items.Add(new Bite());
+		//items.Add(new Cannon());
 
 		if (currentEncounter)
 		{
